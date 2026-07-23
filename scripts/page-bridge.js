@@ -142,6 +142,7 @@
       span.style.color = active ? "#101A3E" : "#8D90A6";
       span.style.fontWeight = active ? "600" : "400";
     });
+    const pageScroller = document.querySelector('[data-h5-page-scroll="true"]');
     const scrollRegion = document.querySelector('[data-h5-scroll-region="supervision"]');
     const listCards = [...(scrollRegion || document).querySelectorAll('[data-name="Button"]')]
       .filter(card => [...card.querySelectorAll("span")].some(span => ["进行中", "待处理", "已办结"].includes(textOf(span))));
@@ -158,7 +159,8 @@
       }
       if (deadlineSpan) deadlineSpan.textContent = completed ? "已完成" : deadlineSpan.dataset.originalText;
     });
-    if (scrollRegion) scrollRegion.scrollTop = 0;
+    if (pageScroller) pageScroller.scrollTop = 0;
+    else if (scrollRegion) scrollRegion.scrollTop = 0;
     send({ action: "show-toast", text: `已切换至${label}` });
   }
 

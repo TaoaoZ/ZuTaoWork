@@ -107,7 +107,10 @@
         contentInner.style.minHeight = "0";
         contentInner.style.display = "flex";
         contentInner.style.flexDirection = "column";
-        contentInner.style.overflow = "hidden";
+        contentInner.dataset.h5PageScroll = "true";
+        contentInner.style.overflowX = "hidden";
+        contentInner.style.overflowY = "auto";
+        contentInner.style.overscrollBehavior = "contain";
         sections.forEach(section => { section.style.flexShrink = "0"; });
 
         if (scrollRegion) {
@@ -116,10 +119,8 @@
           scrollRegion.style.width = "100%";
           scrollRegion.style.height = "auto";
           scrollRegion.style.minHeight = "0";
-          scrollRegion.style.flex = "1 1 auto";
-          scrollRegion.style.overflowX = "hidden";
-          scrollRegion.style.overflowY = "auto";
-          scrollRegion.style.overscrollBehavior = "contain";
+          scrollRegion.style.flex = "0 0 auto";
+          scrollRegion.style.overflow = "visible";
           [...scrollRegion.children].forEach(child => {
             child.style.width = "100%";
             child.style.maxWidth = "100%";
@@ -543,16 +544,22 @@
           overflow: visible !important;
           border-radius: 16px !important;
         }
-        [data-h5-scroll-region] {
-          height: auto !important;
+        [data-h5-page-scroll="true"] {
+          height: 100% !important;
           min-height: 0 !important;
-          flex: 1 1 auto !important;
           overflow-x: hidden !important;
           overflow-y: auto !important;
+          overscroll-behavior: contain;
           scrollbar-width: none !important;
           -webkit-overflow-scrolling: touch;
         }
-        [data-h5-scroll-region]::-webkit-scrollbar { display: none !important; }
+        [data-h5-page-scroll="true"]::-webkit-scrollbar { display: none !important; }
+        [data-h5-scroll-region] {
+          height: auto !important;
+          min-height: 0 !important;
+          flex: 0 0 auto !important;
+          overflow: visible !important;
+        }
         [data-native-interactive-chart="true"] {
           width: 100% !important;
           height: 126px !important;
