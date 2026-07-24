@@ -9,7 +9,35 @@
     安全: "ranking-safety"
   };
   const pageRoutes = { 总览: "overview", 排行: "ranking", 督办: "supervision" };
-  const indicators = ["经营板块", "运营板块", "内控板块", "舆情板块", "创新板块", "安全板块"];
+  const indicators = [
+    { label: "经营板块", indicator: "经营" },
+    { label: "经营指标", indicator: "经营" },
+    { label: "运营板块", indicator: "运营" },
+    { label: "运营指标", indicator: "运营" },
+    { label: "内控板块", indicator: "内控" },
+    { label: "内控指标", indicator: "内控" },
+    { label: "舆情板块", indicator: "舆情" },
+    { label: "舆情指标", indicator: "舆情" },
+    { label: "创新板块", indicator: "创新" },
+    { label: "创新指标", indicator: "创新" },
+    { label: "安全板块", indicator: "安全" },
+    { label: "安全指标", indicator: "安全" }
+  ];
+  const aggregationMetrics = [
+    { label: "营业总收入指标完成度", metric: "营业总收入" },
+    { label: "营业总收入", metric: "营业总收入" },
+    { label: "经营利润指标完成度", metric: "经营利润" },
+    { label: "经营利润", metric: "经营利润" },
+    { label: "收入合约额", metric: "收入合约额" },
+    { label: "企业经营现金流", metric: "企业经营现金流" },
+    { label: "应收金额", metric: "应收金额" },
+    { label: "应付金额", metric: "应付金额" },
+    { label: "经营成本", metric: "经营成本" },
+    { label: "在管项目", metric: "在管项目" },
+    { label: "综合收缴率", metric: "综合收缴率" },
+    { label: "员工数", metric: "员工数" },
+    { label: "逾期应收金额", metric: "逾期应收金额" }
+  ];
   const nativeRankingData = {
     business: {
       accent: "#3D6FE8", unit: "亿", defaultDimension: "收入TOP", periods: { 月度: 1, 季度: 2.75, 年度: 10.8 },
@@ -164,6 +192,19 @@
     send({ action: "show-toast", text: `已切换至${label}` });
   }
 
+  function aggregationMetricForNode(startNode) {
+    let current = startNode;
+    for (let depth = 0; current && depth < 8; depth += 1, current = current.parentElement) {
+      const text = textOf(current);
+      const direct = aggregationMetrics.find(item => text.includes(item.label) && text.length <= 80);
+      if (direct) return direct.metric;
+      const matches = aggregationMetrics.filter(item => text.includes(item.label));
+      const hasMetricValue = Boolean(current.querySelector?.('[data-name="Bold Text"]'));
+      if (matches.length === 1 && hasMetricValue && text.length <= 90) return matches[0].metric;
+    }
+    return "";
+  }
+
   document.addEventListener("click", event => {
     const supervisionTabNode = event.target.closest?.('[data-name="项目预警"], [data-name="项目问题"]');
     if (document.title.includes("督办") && supervisionTabNode) {
@@ -193,10 +234,16 @@
         event.preventDefault();
         return;
       }
-      const indicator = indicators.find(item => text.includes(item) && text.length < 160);
+      const aggregationMetric = aggregationMetricForNode(node);
+      if (aggregationMetric) {
+        event.preventDefault();
+        send({ action: "open-control", control: "aggregation", metric: aggregationMetric });
+        return;
+      }
+      const indicator = indicators.find(item => text.includes(item.label) && text.length < 160);
       if (indicator) {
         event.preventDefault();
-        send({ action: "open-indicator", indicator: indicator.replace("板块", "") });
+        send({ action: "open-indicator", indicator: indicator.indicator });
         return;
       }
       if (name === "切换对象" || text === "切换范围") {

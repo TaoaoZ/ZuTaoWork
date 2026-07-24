@@ -1,5 +1,5 @@
 (function () {
-  const company = "大湾区区域公司";
+  const company = "深圳市天健城市服务有限公司";
   const definitions = {
     经营: [
       ["营业总收入指标完成度", 20, 94, "统计期内实际完成的营业总收入与目标营业总收入的比值，用于衡量收入目标达成情况。", "实际营业总收入 ÷ 目标营业总收入 × 100%", "达到100%得满分；90%-99%按实际完成率计分；80%-89%按完成率×0.9计分；低于80%按完成率×0.8计分；超过110%的部分封顶100分。", "财务系统、经营预算台账", "连续两期低于80%，列入经营预警；如存在收入确认不合规，直接按0分处理。", "各项目实际营业收入、目标收入、完成率及项目排名。", "区域总收入、目标达成率、项目贡献度及低完成项目预警。", "集团总营业收入、区域收入对比、年度预算达成进度。"],
@@ -42,7 +42,7 @@
     ]
   };
   const indicators = {};
-  const displayScores = { 经营: 98, 运营: 97, 内控: 99, 舆情: 96, 创新: 88, 安全: 99 };
+  const displayScores = { 经营: 96, 运营: 95, 内控: 98, 舆情: 95, 创新: 90, 安全: 99 };
   Object.entries(definitions).forEach(([domain, rows]) => {
     const metrics = rows.map(row => ({ name: row[0], weight: row[1], value: row[2], definition: row[3], calculation: row[4], standard: row[5], source: row[6], redline: row[7], project: row[8], region: row[9], hq: row[10] }));
     const weightTotal = metrics.reduce((sum, metric) => sum + metric.weight, 0);

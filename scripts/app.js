@@ -32,13 +32,14 @@
   const frames = new Map([["overview", initialFrame]]);
   let currentRoute = "overview";
   let requestedRoute = "overview";
-  let selectedScope = "大湾区区域公司";
+  let selectedScope = "深圳市天健城市服务有限公司";
   let activeIndicatorName = "经营";
   let pendingScope = "";
   let toastTimer;
   let searchTimer;
+  const domains = ["经营", "运营", "内控", "舆情", "创新", "安全"];
   const companies = [
-    { name: "集团总部", short: "集团", code: "HQ", region: "总部", type: "集团统筹", desc: "全集团经营、运营、内控、安全等指标总览", aliases: ["总部", "集团"] },
+    { name: "深圳市天健城市服务有限公司", short: "天健", code: "HQ", region: "总部", type: "归集主体", desc: "各区域公司与专业公司经营数据归集主体", aliases: ["总部", "集团", "天健城市服务"] },
     { name: "大湾区区域公司", short: "湾区", code: "GBA", region: "华南", type: "区域公司", desc: "深圳、广州、珠海等湾区项目经营管理", aliases: ["大湾区", "深圳", "广州"] },
     { name: "华东区域公司", short: "华东", code: "EC", region: "华东", type: "区域公司", desc: "上海、杭州、南京项目群与区域经营数据", aliases: ["上海", "杭州", "南京"] },
     { name: "华南区域公司", short: "华南", code: "SC", region: "华南", type: "区域公司", desc: "广东、广西、海南片区重点项目经营数据", aliases: ["广东", "广西", "海南"] },
@@ -46,11 +47,188 @@
     { name: "华北区域公司", short: "华北", code: "NC", region: "华北", type: "区域公司", desc: "北京、天津、河北项目群综合经营数据", aliases: ["北京", "天津", "河北"] },
     { name: "西南区域公司", short: "西南", code: "SW", region: "西南", type: "区域公司", desc: "成都、重庆、昆明片区风险与指标数据", aliases: ["成都", "重庆", "昆明"] },
     { name: "西北区域公司", short: "西北", code: "NW", region: "西北", type: "区域公司", desc: "西安、兰州、银川项目经营与安全数据", aliases: ["西安", "兰州", "银川"] },
-    { name: "城市更新事业部", short: "更新", code: "UR", region: "专项", type: "事业部", desc: "城市更新专项项目、合同与利润进度", aliases: ["城市更新", "事业部"] },
-    { name: "智慧运营事业部", short: "智运", code: "SO", region: "专项", type: "事业部", desc: "数字化运营、工单、能耗与服务质量数据", aliases: ["智慧运营", "数字化"] }
+    { name: "生活服务公司", short: "生活", code: "LS", region: "专业公司", type: "专业公司", desc: "社区生活、客户服务与到家服务经营数据", aliases: ["生活服务", "社区服务"] },
+    { name: "智慧运营公司", short: "智运", code: "SO", region: "专业公司", type: "专业公司", desc: "数字化运营、工单、能耗与服务质量数据", aliases: ["智慧运营", "数字化"] },
+    { name: "公建服务公司", short: "公建", code: "PB", region: "专业公司", type: "专业公司", desc: "公共建筑、政企项目与综合物业服务数据", aliases: ["公建", "公共建筑"] },
+    { name: "园区运营公司", short: "园区", code: "PO", region: "专业公司", type: "专业公司", desc: "产业园区、商业园区运营与招商服务数据", aliases: ["园区运营", "园区"] }
   ];
+  const companyProfiles = {
+    "深圳市天健城市服务有限公司": {
+      scores: { 经营: 96, 运营: 95, 内控: 98, 舆情: 95, 创新: 90, 安全: 99 },
+      metrics: [96, 94, 97, 92, 89, 86, 93, 95, 94],
+      overview: { done: "24.60 亿", target: "29.50 亿", progress: "83.4%", contract: "5.98亿", cash: "2.20亿", receivable: "4.28亿", payable: "1.90亿", cost: "19.10亿", projects: "300个", collection: "93.0%", overdue: "1.13亿" }
+    },
+    "大湾区区域公司": {
+      scores: { 经营: 98, 运营: 97, 内控: 99, 舆情: 96, 创新: 88, 安全: 99 },
+      metrics: [98, 96, 99, 94, 90, 88, 95, 97, 96],
+      overview: { done: "5.42 亿", target: "6.20 亿", progress: "87%", contract: "1.36亿", cash: "0.58亿", receivable: "0.82亿", payable: "0.36亿", cost: "4.08亿", projects: "42个", collection: "95.8%", overdue: "0.18亿" }
+    },
+    "华东区域公司": {
+      scores: { 经营: 97, 运营: 96, 内控: 99, 舆情: 97, 创新: 94, 安全: 99 },
+      metrics: [97, 95, 98, 93, 88, 85, 94, 96, 95],
+      overview: { done: "4.86 亿", target: "5.40 亿", progress: "90%", contract: "1.18亿", cash: "0.51亿", receivable: "0.69亿", payable: "0.28亿", cost: "3.62亿", projects: "36个", collection: "96.4%", overdue: "0.12亿" }
+    },
+    "华南区域公司": {
+      scores: { 经营: 95, 运营: 94, 内控: 97, 舆情: 95, 创新: 89, 安全: 98 },
+      metrics: [95, 93, 96, 90, 87, 84, 92, 94, 93],
+      overview: { done: "3.12 亿", target: "3.78 亿", progress: "83%", contract: "0.82亿", cash: "0.29亿", receivable: "0.52亿", payable: "0.24亿", cost: "2.46亿", projects: "31个", collection: "92.8%", overdue: "0.14亿" }
+    },
+    "华中区域公司": {
+      scores: { 经营: 92, 运营: 93, 内控: 96, 舆情: 93, 创新: 86, 安全: 97 },
+      metrics: [92, 90, 94, 86, 84, 81, 91, 92, 90],
+      overview: { done: "2.04 亿", target: "2.62 亿", progress: "78%", contract: "0.46亿", cash: "0.16亿", receivable: "0.38亿", payable: "0.19亿", cost: "1.72亿", projects: "24个", collection: "90.5%", overdue: "0.13亿" }
+    },
+    "华北区域公司": {
+      scores: { 经营: 93, 运营: 92, 内控: 96, 舆情: 92, 创新: 85, 安全: 96 },
+      metrics: [93, 91, 94, 87, 85, 82, 90, 93, 91],
+      overview: { done: "1.72 亿", target: "2.18 亿", progress: "79%", contract: "0.39亿", cash: "0.12亿", receivable: "0.34亿", payable: "0.16亿", cost: "1.39亿", projects: "21个", collection: "89.8%", overdue: "0.11亿" }
+    },
+    "西南区域公司": {
+      scores: { 经营: 88, 运营: 87, 内控: 91, 舆情: 86, 创新: 81, 安全: 89 },
+      metrics: [88, 85, 90, 78, 80, 76, 86, 88, 84],
+      overview: { done: "1.18 亿", target: "1.74 亿", progress: "68%", contract: "0.24亿", cash: "-0.04亿", receivable: "0.42亿", payable: "0.21亿", cost: "1.06亿", projects: "18个", collection: "84.2%", overdue: "0.17亿" }
+    },
+    "西北区域公司": {
+      scores: { 经营: 91, 运营: 90, 内控: 95, 舆情: 91, 创新: 84, 安全: 96 },
+      metrics: [91, 89, 93, 84, 82, 79, 89, 91, 88],
+      overview: { done: "1.34 亿", target: "1.82 亿", progress: "74%", contract: "0.31亿", cash: "0.07亿", receivable: "0.29亿", payable: "0.13亿", cost: "1.08亿", projects: "19个", collection: "88.6%", overdue: "0.09亿" }
+    },
+    "生活服务公司": {
+      scores: { 经营: 94, 运营: 96, 内控: 97, 舆情: 94, 创新: 87, 安全: 98 },
+      metrics: [94, 92, 95, 90, 86, 83, 93, 94, 95],
+      overview: { done: "0.92 亿", target: "1.10 亿", progress: "84%", contract: "0.22亿", cash: "0.11亿", receivable: "0.18亿", payable: "0.08亿", cost: "0.69亿", projects: "16个", collection: "94.8%", overdue: "0.04亿" }
+    },
+    "智慧运营公司": {
+      scores: { 经营: 95, 运营: 98, 内控: 98, 舆情: 95, 创新: 96, 安全: 99 },
+      metrics: [95, 94, 97, 93, 88, 85, 94, 95, 96],
+      overview: { done: "0.76 亿", target: "0.86 亿", progress: "88%", contract: "0.28亿", cash: "0.09亿", receivable: "0.12亿", payable: "0.05亿", cost: "0.52亿", projects: "28个", collection: "96.1%", overdue: "0.02亿" }
+    },
+    "公建服务公司": {
+      scores: { 经营: 93, 运营: 94, 内控: 97, 舆情: 93, 创新: 84, 安全: 99 },
+      metrics: [93, 91, 94, 88, 85, 82, 92, 93, 92],
+      overview: { done: "1.48 亿", target: "1.82 亿", progress: "81%", contract: "0.35亿", cash: "0.13亿", receivable: "0.24亿", payable: "0.11亿", cost: "1.12亿", projects: "34个", collection: "91.7%", overdue: "0.07亿" }
+    },
+    "园区运营公司": {
+      scores: { 经营: 94, 运营: 95, 内控: 96, 舆情: 94, 创新: 91, 安全: 98 },
+      metrics: [94, 93, 95, 89, 86, 84, 92, 94, 93],
+      overview: { done: "1.76 亿", target: "1.98 亿", progress: "89%", contract: "0.37亿", cash: "0.18亿", receivable: "0.28亿", payable: "0.09亿", cost: "1.36亿", projects: "31个", collection: "94.3%", overdue: "0.06亿" }
+    }
+  };
+  const overviewExtras = {
+    "大湾区区域公司": { profit: "0.83 亿", profitTarget: "0.94 亿", profitProgress: "88.3%", employees: "420人" },
+    "华东区域公司": { profit: "0.78 亿", profitTarget: "0.86 亿", profitProgress: "90.7%", employees: "360人" },
+    "华南区域公司": { profit: "0.47 亿", profitTarget: "0.56 亿", profitProgress: "83.9%", employees: "310人" },
+    "华中区域公司": { profit: "0.28 亿", profitTarget: "0.37 亿", profitProgress: "75.7%", employees: "230人" },
+    "华北区域公司": { profit: "0.23 亿", profitTarget: "0.30 亿", profitProgress: "76.7%", employees: "205人" },
+    "西南区域公司": { profit: "0.10 亿", profitTarget: "0.19 亿", profitProgress: "52.6%", employees: "160人" },
+    "西北区域公司": { profit: "0.16 亿", profitTarget: "0.23 亿", profitProgress: "69.6%", employees: "145人" },
+    "生活服务公司": { profit: "0.13 亿", profitTarget: "0.16 亿", profitProgress: "81.3%", employees: "175人" },
+    "智慧运营公司": { profit: "0.17 亿", profitTarget: "0.20 亿", profitProgress: "85.0%", employees: "130人" },
+    "公建服务公司": { profit: "0.21 亿", profitTarget: "0.28 亿", profitProgress: "75.0%", employees: "145人" },
+    "园区运营公司": { profit: "0.26 亿", profitTarget: "0.28 亿", profitProgress: "92.9%", employees: "120人" }
+  };
+  const aggregationMetrics = {
+    营业总收入: { key: "done", unit: "亿", desc: "统计期内已完成营业收入，各下级公司金额相加形成总部归集值。" },
+    经营利润: { key: "profit", unit: "亿", desc: "统计期内实际形成的经营利润，各下级公司利润相加形成总部归集值。" },
+    收入合约额: { key: "contract", unit: "亿", desc: "已签订并生效的收入合同金额，下钻查看区域和专业公司贡献。" },
+    企业经营现金流: { key: "cash", unit: "亿", desc: "经营活动现金净流量，负值代表当前期间经营现金净流出。" },
+    应收金额: { key: "receivable", unit: "亿", desc: "期末经营性应收余额，金额越高代表资金占压越高。" },
+    应付金额: { key: "payable", unit: "亿", desc: "期末经营性应付余额，用于观察付款压力和供应商结算节奏。" },
+    经营成本: { key: "cost", unit: "亿", desc: "统计期内经营成本发生额，各公司成本合计形成总部归集值。" },
+    在管项目: { key: "projects", unit: "个", desc: "当前纳入经营管理口径的项目数量。" },
+    综合收缴率: { key: "collection", unit: "%", desc: "实收金额占应收金额比例，总部为下级公司加权后的归集表现。" },
+    员工数: { key: "employees", unit: "人", desc: "当前纳入经营管理口径的在册员工数量，各下级公司人数相加形成总部归集值。" },
+    逾期应收金额: { key: "overdue", unit: "亿", desc: "已超合同账期仍未收回的应收余额，下钻用于定位重点清欠主体。" }
+  };
 
   const escapeHtml = value => String(value ?? "").replace(/[&<>\"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[character]));
+  const headquarterName = "深圳市天健城市服务有限公司";
+
+  function parseOverviewNumber(value) {
+    const text = String(value || "");
+    const number = Number.parseFloat(text.replace(/[^\d.-]/g, ""));
+    return Number.isFinite(number) ? number : 0;
+  }
+
+  function parseMoneyToYi(value) {
+    const text = String(value || "");
+    const number = parseOverviewNumber(text);
+    if (text.includes("亿")) return number;
+    if (text.includes("万")) return number / 10000;
+    if (text.includes("元")) return number / 100000000;
+    return Math.abs(number) >= 1000000 ? number / 100000000 : number;
+  }
+
+  function parsePeopleNumber(value) {
+    const text = String(value || "");
+    const number = parseOverviewNumber(text);
+    return text.includes("万") ? number * 10000 : number;
+  }
+
+  function formatOverviewMoney(value, spaced = false) {
+    const number = Number(value);
+    const amount = (Number.isFinite(number) ? number : 0).toFixed(2).replace(/\.?0+$/, "");
+    return spaced ? `${amount} 亿` : `${amount}亿`;
+  }
+
+  function formatOverviewPercent(value) {
+    return `${value.toFixed(1)}%`;
+  }
+
+  function displayMetricValue(metric, value) {
+    if (metric.unit === "人") {
+      const people = parsePeopleNumber(value);
+      return `${Math.round(Number.isFinite(people) ? people : 0)}人`;
+    }
+    if (metric.unit === "亿") return formatOverviewMoney(parseMoneyToYi(value));
+    const amount = parseOverviewNumber(value);
+    if (metric.unit === "%") return formatOverviewPercent(amount);
+    if (metric.unit === "个") return `${Math.round(amount)}个`;
+    return String(value || "-");
+  }
+
+  function normalizeHeadquarterOverview() {
+    Object.entries(overviewExtras).forEach(([name, extra]) => {
+      if (companyProfiles[name]) companyProfiles[name].overview = { ...companyProfiles[name].overview, ...extra };
+    });
+    const headquarter = companyProfiles[headquarterName]?.overview;
+    if (!headquarter) return;
+    const children = companies
+      .filter(company => company.name !== headquarterName)
+      .map(company => companyProfiles[company.name]?.overview)
+      .filter(Boolean);
+    const moneyKeys = new Set(["done", "target", "profit", "profitTarget", "contract", "cash", "receivable", "payable", "cost", "overdue"]);
+    const sum = key => children.reduce((total, overview) => {
+      if (moneyKeys.has(key)) return total + parseMoneyToYi(overview[key]);
+      if (key === "employees") return total + parsePeopleNumber(overview[key]);
+      return total + parseOverviewNumber(overview[key]);
+    }, 0);
+    const done = sum("done");
+    const target = sum("target");
+    const profit = sum("profit");
+    const profitTarget = sum("profitTarget");
+    const receivable = sum("receivable");
+    headquarter.done = formatOverviewMoney(done, true);
+    headquarter.target = formatOverviewMoney(target, true);
+    headquarter.progress = target ? formatOverviewPercent(done / target * 100) : "-";
+    headquarter.contract = formatOverviewMoney(sum("contract"));
+    headquarter.cash = formatOverviewMoney(sum("cash"));
+    headquarter.receivable = formatOverviewMoney(receivable);
+    headquarter.payable = formatOverviewMoney(sum("payable"));
+    headquarter.cost = formatOverviewMoney(sum("cost"));
+    headquarter.projects = `${Math.round(sum("projects"))}个`;
+    headquarter.overdue = formatOverviewMoney(sum("overdue"));
+    headquarter.profit = formatOverviewMoney(profit, true);
+    headquarter.profitTarget = formatOverviewMoney(profitTarget, true);
+    headquarter.profitProgress = profitTarget ? formatOverviewPercent(profit / profitTarget * 100) : "-";
+    headquarter.employees = `${Math.round(sum("employees"))}人`;
+    const collectionWeightedTotal = children.reduce((total, overview) => {
+      return total + parseMoneyToYi(overview.receivable) * parseOverviewNumber(overview.collection);
+    }, 0);
+    headquarter.collection = receivable ? formatOverviewPercent(collectionWeightedTotal / receivable) : "-";
+  }
+
+  normalizeHeadquarterOverview();
 
   function markFrameReady(frame, route) {
     if (frame.classList.contains("is-ready")) return;
@@ -87,10 +265,165 @@
     return frame;
   }
 
+  function scopeProfile() {
+    return companyProfiles[selectedScope] || companyProfiles[headquarterName];
+  }
+
+  function scopedIndicatorData(name) {
+    const source = window.PROTOTYPE_DATA?.indicators?.[name] || window.PROTOTYPE_DATA?.indicators?.经营;
+    if (!source) return null;
+    const profile = scopeProfile();
+    const values = name === "经营" ? profile.metrics : null;
+    const metrics = source.metrics.map((metric, index) => ({
+      ...metric,
+      value: values ? values[index] ?? metric.value : Math.max(70, Math.min(100, metric.value + (profile.scores[name] || source.score) - source.score))
+    }));
+    return {
+      ...source,
+      company: selectedScope,
+      score: profile.scores[name] || source.score,
+      metrics
+    };
+  }
+
+  function findCardValueByLabel(doc, label) {
+    const labelNode = [...doc.querySelectorAll("span")].find(node => (node.textContent || "").trim() === label);
+    let current = labelNode?.parentElement;
+    for (let depth = 0; current && depth < 8; depth += 1, current = current.parentElement) {
+      const value = current.querySelector('[data-name="Bold Text"] span');
+      if (value) return value;
+    }
+    return null;
+  }
+
+  function findMetricCardByLabel(doc, label) {
+    const labelNode = [...doc.querySelectorAll("span")].find(node => (node.textContent || "").trim() === label);
+    let current = labelNode?.parentElement;
+    for (let depth = 0; current && depth < 10; depth += 1, current = current.parentElement) {
+      if ((current.textContent || "").includes(label) && current.querySelector('[data-name="Bold Text"] span')) return current;
+    }
+    return null;
+  }
+
+  function updateCompletionCard(doc, label, progress, done, target) {
+    const card = findMetricCardByLabel(doc, label);
+    if (!card) return;
+    const progressNode = card.querySelector('[data-name="Bold Text"] span');
+    if (progressNode) progressNode.textContent = progress;
+    const summaryNode = [...card.querySelectorAll("span")].find(node => (node.textContent || "").includes("已完成"));
+    if (summaryNode) summaryNode.textContent = `已完成 ${done} / 目标 ${target} · 剩余 ${overviewRemaining(done, target)}`;
+    const targetNode = [...card.querySelectorAll("span")].find(node => (node.textContent || "").includes("目标线"));
+    if (targetNode) targetNode.textContent = `目标线 ${target}`;
+  }
+
+  function updateDomainScores(doc, scores) {
+    if (!String(doc.title || "").includes("总览")) return;
+    domains.forEach(domain => {
+      const labels = [`${domain}板块`, domain];
+      labels.forEach(label => {
+        [...doc.querySelectorAll("span")].filter(node => (node.textContent || "").trim() === label).forEach(labelNode => {
+          const card = labelNode.closest('[data-name="Button"], [data-name="Container"]') || labelNode.parentElement?.parentElement;
+          const value = [...(card?.querySelectorAll("span") || [])].find(node => /^\d{2,3}$/.test((node.textContent || "").trim()) && node !== labelNode);
+          if (value && scores[domain] !== undefined) value.textContent = String(scores[domain]);
+        });
+      });
+    });
+  }
+
+  function updateOverviewNumbers(doc, profile) {
+    if (!String(doc.title || "").includes("总览")) return;
+    const overview = profile.overview;
+    updateCompletionCard(doc, "营业总收入指标完成度", overview.progress, overview.done, overview.target);
+    updateCompletionCard(doc, "经营利润指标完成度", overview.profitProgress, overview.profit, overview.profitTarget);
+    const values = {
+      收入合约额: displayMetricValue(aggregationMetrics.收入合约额, overview.contract),
+      企业经营现金流: displayMetricValue(aggregationMetrics.企业经营现金流, overview.cash),
+      应收金额: displayMetricValue(aggregationMetrics.应收金额, overview.receivable),
+      应付金额: displayMetricValue(aggregationMetrics.应付金额, overview.payable),
+      经营成本: displayMetricValue(aggregationMetrics.经营成本, overview.cost),
+      在管项目: displayMetricValue(aggregationMetrics.在管项目, overview.projects),
+      综合收缴率: displayMetricValue(aggregationMetrics.综合收缴率, overview.collection),
+      员工数: displayMetricValue(aggregationMetrics.员工数, overview.employees),
+      逾期应收金额: displayMetricValue(aggregationMetrics.逾期应收金额, overview.overdue)
+    };
+    Object.entries(values).forEach(([label, value]) => {
+      const node = findCardValueByLabel(doc, label);
+      if (node) node.textContent = value;
+    });
+  }
+
+  function overviewRemaining(doneText, targetText) {
+    const done = parseMoneyToYi(doneText);
+    const target = parseMoneyToYi(targetText);
+    if (!Number.isFinite(done) || !Number.isFinite(target)) return "";
+    return formatOverviewMoney(Math.max(0, target - done), true);
+  }
+
+  function numericValue(value) {
+    return parseOverviewNumber(value);
+  }
+
+  function metricAmount(metric, value) {
+    if (metric.unit === "亿") return parseMoneyToYi(value);
+    if (metric.unit === "人") return parsePeopleNumber(value);
+    return parseOverviewNumber(value);
+  }
+
+  function aggregationRows(metric) {
+    const headquarter = companies.find(company => company.name === headquarterName);
+    const children = companies.filter(company => company.name !== headquarterName);
+    return [headquarter, ...children].filter(Boolean).map(company => {
+      const sourceValue = companyProfiles[company.name]?.overview?.[metric.key] || "-";
+      const value = displayMetricValue(metric, sourceValue);
+      return {
+        company,
+        value,
+        amount: metricAmount(metric, sourceValue)
+      };
+    });
+  }
+
+  function aggregationShare(row, rows, metric) {
+    if (metric.unit === "%") return row.company.type;
+    const total = rows[0]?.amount || 0;
+    if (!total || row.company.name === headquarterName) return "归集总计";
+    return `占比 ${Math.max(0, row.amount / total * 100).toFixed(1)}%`;
+  }
+
+  function renderAggregationBreakdown(label) {
+    const metric = aggregationMetrics[label] || aggregationMetrics.营业总收入;
+    const rows = aggregationRows(metric);
+    const summary = rows.find(row => row.company.name === selectedScope) || rows[0];
+    return `
+      <div class="aggregation-summary">
+        <span>${escapeHtml(summary.company.name)}</span>
+        <strong>${escapeHtml(summary.value)}</strong>
+        <p>${escapeHtml(metric.desc)}</p>
+      </div>
+      <div class="aggregation-list">
+        ${rows.map((row, index) => `
+          <article class="aggregation-row ${row.company.name === selectedScope ? "is-current" : ""} ${index === 0 ? "is-total" : ""}">
+            <span class="aggregation-badge">${escapeHtml(row.company.short)}</span>
+            <div class="aggregation-main">
+              <div><b>${escapeHtml(row.company.name)}</b>${row.company.name === selectedScope ? "<i>当前</i>" : ""}</div>
+              <p>${escapeHtml(row.company.type)} · ${escapeHtml(row.company.region)} · ${escapeHtml(aggregationShare(row, rows, metric))}</p>
+            </div>
+            <strong>${escapeHtml(row.value)}</strong>
+          </article>
+        `).join("")}
+      </div>`;
+  }
+
   function applyScope(frame) {
     try {
       const company = frame.contentDocument?.querySelector('[data-name="天健城市服务有限公司"]');
       if (company) company.textContent = selectedScope;
+      const doc = frame.contentDocument;
+      const profile = scopeProfile();
+      if (doc) {
+        updateDomainScores(doc, profile.scores);
+        updateOverviewNumbers(doc, profile);
+      }
     } catch (error) {
       // All prototype frames are same-origin; this guard keeps navigation safe
       // if the files are opened from a different host during handoff.
@@ -127,7 +460,7 @@
   }
 
   function openIndicator(name) {
-    const data = window.PROTOTYPE_DATA?.indicators?.[name] || window.PROTOTYPE_DATA?.indicators?.经营;
+    const data = scopedIndicatorData(name);
     if (!data) return;
     activeIndicatorName = name;
     modalTitle.textContent = "指标健康情况";
@@ -255,6 +588,11 @@
       sheetEyebrow.textContent = "工作台设置";
       sheetTitle.textContent = "个人快捷操作";
       sheetContent.innerHTML = `<div class="sheet-list"><button class="menu-action" type="button" data-menu-action="profile"><span>个人信息与权限</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="notice"><span>消息通知设置</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="refresh"><span>刷新全部驾驶舱数据</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="about"><span>关于企业经营管理驾驶舱</span><span>›</span></button></div>`;
+    } else if (type === "aggregation") {
+      const label = aggregationMetrics[payload.metric] ? payload.metric : "营业总收入";
+      sheetEyebrow.textContent = "数据穿透";
+      sheetTitle.textContent = `${label}明细`;
+      sheetContent.innerHTML = renderAggregationBreakdown(label);
     } else if (type === "feed") {
       sheetEyebrow.textContent = "动态中心";
       sheetTitle.textContent = "最近更新动态";
