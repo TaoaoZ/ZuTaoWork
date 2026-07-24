@@ -149,7 +149,6 @@
 
   function renderFilters() {
     return `<section class="supervision-panel">
-      <label class="supervision-search"><span aria-hidden="true"></span><input type="search" placeholder="搜索事项、公司、负责人或手机号" value="${escapeHtml(state.query)}" data-supervision-search /></label>
       ${filters.map(group => `
       <div class="supervision-filter-row">
         <span>${escapeHtml(group.label)}</span>
@@ -208,7 +207,34 @@
       </div>
       <div class="supervision-list">${rows.length ? rows.map(renderCard).join("") : `<div class="supervision-empty">当前筛选条件下暂无督办事项</div>`}</div>
     </main>`;
+    mountPrototypeSearch();
     bind();
+  }
+
+  function findPrototypeSearchBox() {
+    const mounted = document.querySelector('[data-prototype-search="supervision"]');
+    if (mounted) return mounted;
+    const placeholder = [...document.querySelectorAll("span")]
+      .find(span => (span.textContent || "").trim() === "请输入标题名称进行搜索");
+    return placeholder?.parentElement || null;
+  }
+
+  function mountPrototypeSearch() {
+    const box = findPrototypeSearchBox();
+    if (!box) return;
+    box.dataset.prototypeSearch = "supervision";
+    box.innerHTML = `<label class="prototype-page-search"><span aria-hidden="true"></span><input type="search" placeholder="搜索事项、公司、负责人或手机号" value="${escapeHtml(state.query)}" data-supervision-search /></label>`;
+    const input = box.querySelector("[data-supervision-search]");
+    input?.addEventListener("input", () => {
+      state.query = input.value;
+      render();
+      requestAnimationFrame(() => {
+        const next = document.querySelector("[data-supervision-search]");
+        if (!next) return;
+        next.focus();
+        next.setSelectionRange(next.value.length, next.value.length);
+      });
+    });
   }
 
   function bind() {
@@ -216,17 +242,6 @@
       button.addEventListener("click", () => {
         state[button.dataset.supervisionFilter] = button.dataset.supervisionValue;
         render();
-      });
-    });
-    const search = document.querySelector("[data-supervision-search]");
-    search?.addEventListener("input", () => {
-      state.query = search.value;
-      render();
-      requestAnimationFrame(() => {
-        const next = document.querySelector("[data-supervision-search]");
-        if (!next) return;
-        next.focus();
-        next.setSelectionRange(next.value.length, next.value.length);
       });
     });
   }

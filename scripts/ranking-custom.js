@@ -299,12 +299,38 @@
             <div class="custom-section-note">${state.scope === scopes.headquarter ? "区域/专业公司排行" : "项目排行"} · ${escapeHtml(state.scope)}</div>
           </div>
         </div>
-        <label class="custom-search"><span aria-hidden="true"></span><input type="search" placeholder="${state.scope === scopes.headquarter ? "搜索区域/专业公司" : "搜索项目名称"}" value="${escapeHtml(state.query)}" data-rank-search /></label>
         ${data.segments.map((_, segment) => renderMetricCard(segment)).join("")}
       </div>`;
     setActiveTab();
     document.title = `企业经营管理驾驶舱 · ${data.tab}排行`;
+    mountPrototypeSearch();
     rootInteractive();
+  }
+
+  function findPrototypeSearchBox() {
+    const mounted = document.querySelector('[data-prototype-search="ranking"]');
+    if (mounted) return mounted;
+    const placeholder = [...document.querySelectorAll("span")]
+      .find(span => (span.textContent || "").trim() === "请输入标题名称进行搜索");
+    return placeholder?.parentElement || null;
+  }
+
+  function mountPrototypeSearch() {
+    const box = findPrototypeSearchBox();
+    if (!box) return;
+    box.dataset.prototypeSearch = "ranking";
+    box.innerHTML = `<label class="prototype-page-search"><span aria-hidden="true"></span><input type="search" placeholder="${state.scope === scopes.headquarter ? "搜索区域/专业公司" : "搜索项目名称"}" value="${escapeHtml(state.query)}" data-rank-search /></label>`;
+    const input = box.querySelector("[data-rank-search]");
+    input?.addEventListener("input", () => {
+      state.query = input.value;
+      render();
+      requestAnimationFrame(() => {
+        const next = document.querySelector("[data-rank-search]");
+        if (!next) return;
+        next.focus();
+        next.setSelectionRange(next.value.length, next.value.length);
+      });
+    });
   }
 
   function rootInteractive() {
@@ -314,17 +340,6 @@
       state.metricPeriods[Number(button.dataset.periodSegment)] = Number(button.dataset.periodIndex);
       render();
     }));
-    const search = root.querySelector("[data-rank-search]");
-    search?.addEventListener("input", () => {
-      state.query = search.value;
-      render();
-      requestAnimationFrame(() => {
-        const next = document.querySelector("[data-rank-search]");
-        if (!next) return;
-        next.focus();
-        next.setSelectionRange(next.value.length, next.value.length);
-      });
-    });
     root.querySelectorAll(".custom-rank").forEach(item => item.addEventListener("click", () => {
       const segment = Number(item.dataset.rankSegment || 0);
       window.parent.postMessage({ source: "mastergo-prototype", action: "open-control", control: "detail", title: item.textContent.trim().replace(/\s+/g, " ").slice(0, 34), description: `已打开${metricTitle(segment)}详情，支持查看趋势、责任主体和异常记录。` }, "*");
