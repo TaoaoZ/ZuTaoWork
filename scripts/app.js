@@ -269,6 +269,21 @@
     return companyProfiles[selectedScope] || companyProfiles[headquarterName];
   }
 
+  const companySearchHints = {
+    "深圳市天健城市服务有限公司": "tj sz tianjian shenzhen zongbu jituan csfw",
+    "大湾区区域公司": "dwq wq gba dawanqu wanqu yuegangao shenzhen guangzhou zhuhai",
+    "华东区域公司": "hd ec huadong shanghai hangzhou nanjing",
+    "华南区域公司": "hn sc huanan guangdong guangxi hainan",
+    "华中区域公司": "hz cc huazhong wuhan changsha zhengzhou",
+    "华北区域公司": "hb nc huabei beijing tianjin hebei",
+    "西南区域公司": "xn sw xinan chengdu chongqing kunming",
+    "西北区域公司": "xb nw xibei xian lanzhou yinchuan",
+    "生活服务公司": "sh ls shenghuo shequ daojia",
+    "智慧运营公司": "zhyy zy so zhihuiyunying shuzi gongdan nenghao",
+    "公建服务公司": "gj pb gongjian gonggongjianzhu zhengqi",
+    "园区运营公司": "yq po yuanqu chanye shangye zhaoshang"
+  };
+
   function scopedIndicatorData(name) {
     const source = window.PROTOTYPE_DATA?.indicators?.[name] || window.PROTOTYPE_DATA?.indicators?.经营;
     if (!source) return null;
@@ -284,6 +299,97 @@
       score: profile.scores[name] || source.score,
       metrics
     };
+  }
+
+  function indicatorChildCompanies() {
+    return companies.filter(company => company.name !== headquarterName);
+  }
+
+  function metricBusinessMeasure(metricName, overview) {
+    const map = {
+      营业总收入指标完成度: { key: "progress", unit: "%" },
+      经营利润指标完成度: { key: "profitProgress", unit: "%" },
+      收入合约额: { key: "contract", unit: "亿" },
+      企业经营现金流: { key: "cash", unit: "亿" },
+      应收金额: { key: "receivable", unit: "亿" },
+      逾期应收金额: { key: "overdue", unit: "亿" },
+      应付金额: { key: "payable", unit: "亿" },
+      经营成本: { key: "cost", unit: "亿" },
+      综合收缴率: { key: "collection", unit: "%" }
+    };
+    const config = map[metricName];
+    if (!config) return "";
+    return displayMetricValue(config, overview?.[config.key]);
+  }
+
+  function metricCompanyValue(domain, metric, index, companyIndex, profile, source) {
+    if (domain === "经营") return profile.metrics?.[index] ?? metric.value;
+    const offset = [0.8, -0.4, 0.2, -0.7, 0.4, -1.1, -0.2, 0.3, -0.5, 0.1, -0.3][companyIndex] || 0;
+    const domainShift = (profile.scores?.[domain] || source.score) - source.score;
+    return Math.max(60, Math.min(100, Number((metric.value + domainShift + offset).toFixed(1))));
+  }
+
+  function metricMeasureText(domain, metric, value, profile) {
+    if (domain === "经营") return metricBusinessMeasure(metric.name, profile.overview) || `${value}%`;
+    if (metric.name.includes("事故")) return value >= 98 ? "0起" : "1起";
+    if (metric.name.includes("投诉") || metric.name.includes("舆情")) return metric.name.includes("数量") || metric.name.includes("事件数") ? `${Math.max(0, Math.round((100 - value) / 6))}件` : `${value}%`;
+    if (metric.name.includes("时长")) return `${Math.max(8, Math.round((108 - value) * 1.2))}小时`;
+    if (metric.name.includes("合同")) return formatOverviewMoney(Math.max(0.03, (value - 80) / 100));
+    if (metric.name.includes("知识产权")) return `${Math.round(value)}分`;
+    return `${value}%`;
+  }
+
+  function renderMetricBreakdown(domain, metric, index, source) {
+    const headquarter = companyProfiles[headquarterName];
+    const rows = indicatorChildCompanies().map((company, companyIndex) => {
+      const profile = companyProfiles[company.name];
+      const value = metricCompanyValue(domain, metric, index, companyIndex, profile, source);
+      return {
+        company,
+        value,
+        measure: metricMeasureText(domain, metric, value, profile),
+        status: value >= 90 ? "达标" : value >= 85 ? "跟进" : "预警"
+      };
+    });
+    const hqMeasure = domain === "经营"
+      ? metricBusinessMeasure(metric.name, headquarter.overview) || `${metric.value}分`
+      : metricMeasureText(domain, metric, metric.value, headquarter);
+    const achieved = rows.filter(row => row.value >= 90).length;
+    const regionRows = rows.filter(row => row.company.type === "区域公司");
+    const professionalRows = rows.filter(row => row.company.type === "专业公司");
+    const groupMeta = items => `${items.length} 家 · 达标 ${items.filter(row => row.status === "达标").length} 家`;
+    const renderRows = items => items.map(row => `
+      <article class="metric-company-row ${row.status === "预警" ? "is-risk" : row.status === "跟进" ? "is-watch" : ""}">
+        <span class="metric-company-avatar">${escapeHtml(row.company.short)}</span>
+        <div class="metric-company-main">
+          <div><b>${escapeHtml(row.company.name)}</b><i>${escapeHtml(row.company.type)}</i></div>
+          <p>${escapeHtml(row.company.region)} · ${escapeHtml(row.status)}</p>
+          <span class="metric-company-track"><em style="width:${Math.max(8, Math.min(100, row.value))}%"></em></span>
+        </div>
+        <strong class="metric-company-measure">${escapeHtml(row.measure)}</strong>
+        <strong class="metric-company-score">${escapeHtml(row.value)}<em>分</em></strong>
+      </article>`).join("");
+    return `
+      <div class="metric-detail-grid">
+        <div class="metric-breakdown-summary">
+          <div class="metric-breakdown-title">
+            <span>深圳市天健城市服务有限公司</span>
+            <strong>${escapeHtml(hqMeasure)}</strong>
+          </div>
+          <p>总部归集口径，按区域公司和专业公司两级展示同项指标数据。</p>
+          <div class="metric-breakdown-stats"><b>${rows.length} 家下级公司</b><b>${achieved} 家达标</b><b>${rows.length - achieved} 家需跟进</b></div>
+        </div>
+        <div class="metric-breakdown-group">
+          <h4><span>区域公司</span><em>${groupMeta(regionRows)}</em></h4>
+          <div class="metric-company-header"><span>公司</span><span>业务值</span><span>得分</span></div>
+          <div class="metric-company-list">${renderRows(regionRows)}</div>
+        </div>
+        <div class="metric-breakdown-group">
+          <h4><span>专业公司</span><em>${groupMeta(professionalRows)}</em></h4>
+          <div class="metric-company-header"><span>公司</span><span>业务值</span><span>得分</span></div>
+          <div class="metric-company-list">${renderRows(professionalRows)}</div>
+        </div>
+      </div>`;
   }
 
   function findCardValueByLabel(doc, label) {
@@ -424,6 +530,8 @@
         updateDomainScores(doc, profile.scores);
         updateOverviewNumbers(doc, profile);
       }
+      frame.contentWindow?.postMessage({ source: "prototype-app", action: "scope-updated", scope: selectedScope }, "*");
+      frame.contentWindow?.prototypeRanking?.setScope?.(selectedScope);
     } catch (error) {
       // All prototype frames are same-origin; this guard keeps navigation safe
       // if the files are opened from a different host during handoff.
@@ -460,10 +568,11 @@
   }
 
   function openIndicator(name) {
-    const data = scopedIndicatorData(name);
+    const source = window.PROTOTYPE_DATA?.indicators?.[name] || window.PROTOTYPE_DATA?.indicators?.经营;
+    const data = source ? { ...source, company: headquarterName } : scopedIndicatorData(name);
     if (!data) return;
     activeIndicatorName = name;
-    modalTitle.textContent = "指标健康情况";
+    modalTitle.textContent = "指标下钻明细";
     const healthy = data.metrics.filter(metric => metric.value >= 90).length;
     const segmentCount = data.metrics.length;
     const activeSegments = healthy;
@@ -471,27 +580,17 @@
       <div class="indicator-summary">
         <div class="summary-line"><span>当前综合分</span><strong class="summary-score">${data.score}</strong></div>
         <div class="summary-track">${Array.from({ length: segmentCount }, (_, index) => `<i class="${index < activeSegments ? "is-filled" : ""}"></i>`).join("")}</div>
-        <div class="summary-meta">年度指标 ${data.metrics.length} 项 / 已达标 ${healthy} 项</div>
+        <div class="summary-meta">${headquarterName} · 年度指标 ${data.metrics.length} 项 / 已达标 ${healthy} 项</div>
       </div>
-      <div class="scope-field"><label>按公司分类</label><button type="button" data-modal-scope><span class="scope-dot"></span><span>${escapeHtml(selectedScope)}</span><span class="scope-chevron" aria-hidden="true"></span></button></div>
-      <div class="metric-list">${data.metrics.map(metric => `
+      <div class="metric-list">${data.metrics.map((metric, index) => `
         <details class="metric-item">
           <summary>
-            <div class="metric-head"><span class="metric-name">${escapeHtml(metric.name)}</span><span class="metric-weight">权重 ${metric.weight}%</span><strong class="metric-value">${metric.value}<small>%</small></strong></div>
+            <div class="metric-head"><span class="metric-name">${escapeHtml(metric.name)}</span><span class="metric-weight">权重 ${metric.weight}%</span><strong class="metric-value">${metric.value}<small>分</small></strong></div>
             <p class="metric-copy">指标权重 ${metric.weight}% · 数据来源：${escapeHtml(metric.source)}</p>
             <div class="metric-track"><i style="width:${metric.value}%"></i></div>
             <div class="metric-foot"><span>口径：${escapeHtml(metric.calculation)}</span><span>${metric.value >= 90 ? "达标" : "持续推进"}</span></div>
           </summary>
-          <div class="metric-detail-grid">
-            <div class="metric-detail-row"><b>指标定义</b><span>${escapeHtml(metric.definition)}</span></div>
-            <div class="metric-detail-row"><b>计算口径</b><span>${escapeHtml(metric.calculation)}</span></div>
-            <div class="metric-detail-row"><b>评分标准</b><span>${escapeHtml(metric.standard)}</span></div>
-            <div class="metric-detail-row"><b>红线规则</b><span>${escapeHtml(metric.redline)}</span></div>
-            <div class="metric-detail-row"><b>项目层穿透</b><span>${escapeHtml(metric.project)}</span></div>
-            <div class="metric-detail-row"><b>区域层穿透</b><span>${escapeHtml(metric.region)}</span></div>
-            <div class="metric-detail-row"><b>本部层穿透</b><span>${escapeHtml(metric.hq)}</span></div>
-            <div class="metric-detail-row"><b>数据说明</b><span>指标定义来自正式说明表；当前分值为交互原型仿真值。${data.weightTotal !== 100 ? `${name}板块原表权重合计 ${data.weightTotal}%，已保留原始权重。` : ""}</span></div>
-          </div>
+          ${renderMetricBreakdown(name, metric, index, source || data)}
         </details>`).join("")}</div>`;
     modal.hidden = false;
   }
@@ -505,24 +604,28 @@
     companyPage.dataset.returnIndicator = "";
   }
 
-  const normalizeSearch = value => String(value || "").toLowerCase().replace(/\s+/g, "");
+  const normalizeSearch = value => String(value || "").toLowerCase().replace(/[\s·、，,。._\-()（）/\\]+/g, "");
 
   function fuzzyMatch(source, query) {
+    const rawQuery = String(query || "").trim();
+    if (!rawQuery) return true;
     const haystack = normalizeSearch(source);
-    const needle = normalizeSearch(query);
-    if (!needle) return true;
-    if (haystack.includes(needle)) return true;
-    let cursor = 0;
-    for (const character of needle) {
-      cursor = haystack.indexOf(character, cursor);
-      if (cursor === -1) return false;
-      cursor += 1;
-    }
-    return true;
+    return rawQuery.split(/[\s,，、]+/).filter(Boolean).every(token => {
+      const needle = normalizeSearch(token);
+      if (!needle) return true;
+      if (haystack.includes(needle)) return true;
+      let cursor = 0;
+      for (const character of needle) {
+        cursor = haystack.indexOf(character, cursor);
+        if (cursor === -1) return false;
+        cursor += 1;
+      }
+      return true;
+    });
   }
 
   function companySearchText(company) {
-    return [company.name, company.short, company.code, company.region, company.type, company.desc, ...(company.aliases || [])].join(" ");
+    return [company.name, company.short, company.code, company.region, company.type, company.desc, companySearchHints[company.name], ...(company.aliases || [])].join(" ");
   }
 
   function renderCompanySelector() {

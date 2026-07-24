@@ -60,7 +60,7 @@ button { font: inherit; }
   width: calc(100% - 14px);
   max-height: calc(100vh - 16px);
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
   box-shadow: 0 12px 32px rgba(18, 34, 72, 0.2);
   animation: dialog-in 180ms ease-out;
@@ -70,12 +70,12 @@ button { font: inherit; }
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 18px 20px 14px;
+  padding: 16px 18px 12px;
   background: #fff;
 }
 
-.dialog-header span { display: block; margin-bottom: 4px; color: #667085; font-size: 14px; line-height: 18px; }
-.dialog-header h2 { margin: 0; color: #111827; font-size: 26px; line-height: 34px; }
+.dialog-header span { display: block; margin-bottom: 4px; color: #667085; font-size: 12px; line-height: 16px; }
+.dialog-header h2 { margin: 0; color: #111827; font-size: 22px; line-height: 29px; }
 .dialog-close { width: 44px; height: 44px; border: 0; border-radius: 50%; color: #263148; background: #f2f4f7; font-size: 30px; line-height: 42px; cursor: pointer; }
 
 #indicator-content {
@@ -86,14 +86,14 @@ button { font: inherit; }
   scrollbar-width: none;
 }
 #indicator-content::-webkit-scrollbar { display: none; }
-.indicator-summary { margin: 0 20px 32px; padding: 12px; border-radius: 16px; background: #f5f7fb; }
+.indicator-summary { margin: 0 16px 12px; padding: 12px; border-radius: 8px; background: #f5f7fb; }
 .summary-line { display: flex; align-items: flex-start; flex-direction: column; gap: 3px; }
 .summary-line span { color: #667085; font-size: 14px; line-height: 18px; }
 .summary-score { color: #3662ec; font-family: "JetBrains Mono", Consolas, monospace; font-size: 30px; font-weight: 700; line-height: 1; }
 .summary-track { height: 6px; display: flex; gap: 3px; margin-top: 10px; overflow: hidden; }
 .summary-track i { min-width: 0; height: 100%; flex: 1; border-radius: 99px; background: #d8dde5; }
 .summary-track i.is-filled { background: #2ecb70; }
-.summary-meta { margin-top: 5px; overflow: hidden; color: #8898b4; font-size: 14px; line-height: 18px; white-space: nowrap; }
+.summary-meta { margin-top: 5px; overflow: hidden; color: #8898b4; font-size: 11px; line-height: 15px; white-space: nowrap; text-overflow: ellipsis; }
 
 .scope-field { margin: 0 10px 18px; padding: 10px; border: 1px solid #e5e5e5; border-radius: 12px; background: #fff; }
 .scope-field label { display: block; margin-bottom: 6px; color: #0a0a0a; font-size: 14px; font-weight: 600; line-height: 21px; }
@@ -102,7 +102,7 @@ button { font: inherit; }
 .scope-chevron { position: relative; width: 16px; height: 16px; display: block; }
 .scope-chevron::before { content: ""; position: absolute; left: 5px; top: 4px; width: 5px; height: 5px; border-right: 1.5px solid #667085; border-bottom: 1.5px solid #667085; transform: rotate(45deg); }
 
-.metric-list { display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 2px; background: #f5f6f9; }
+.metric-list { display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 10px; background: #f5f6f9; }
 .metric-item { padding: 12px; border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 8px; background: #fff; box-shadow: none; }
 .metric-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
 .metric-name { overflow: hidden; color: #3662ec; font-size: 17px; font-weight: 700; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
@@ -116,10 +116,42 @@ button { font: inherit; }
 .metric-foot span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .metric-foot span:last-child { display: none; }
 .metric-weight { display: none; }
-.metric-detail-grid { display: grid; gap: 6px; margin-top: 10px; padding-top: 2px; }
+.metric-detail-grid { display: grid; gap: 10px; margin-top: 10px; padding-top: 2px; }
 .metric-detail-row { padding-top: 7px; border-top: 1px solid #eef1f6; }
 .metric-detail-row b { display: block; margin-bottom: 3px; color: #59677d; font-size: 10px; }
 .metric-detail-row span { display: block; color: #7a879b; font-size: 10px; line-height: 1.55; }
+.metric-breakdown-summary { padding: 11px 12px; border: 1px solid rgba(54,98,236,0.16); border-radius: 8px; background: linear-gradient(180deg, #f7f9ff 0%, #fff 100%); }
+.metric-breakdown-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 10px; }
+.metric-breakdown-summary span { display: block; overflow: hidden; color: #667085; font-size: 10px; line-height: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.metric-breakdown-summary strong { display: block; color: #3662ec; font-size: 22px; line-height: 26px; white-space: nowrap; }
+.metric-breakdown-summary p { margin: 4px 0 0; color: #59677d; font-size: 10px; line-height: 15px; }
+.metric-breakdown-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+.metric-breakdown-summary b { min-width: 0; padding: 5px 4px; border-radius: 6px; color: #42526b; background: #fff; font-size: 9px; line-height: 12px; text-align: center; white-space: nowrap; }
+.metric-breakdown-group { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid #eef1f6; }
+.metric-breakdown-group h4 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; color: #17213c; font-size: 12px; line-height: 16px; }
+.metric-breakdown-group h4 span { font-weight: 700; }
+.metric-breakdown-group h4 em { overflow: hidden; color: #8a96aa; font-size: 9px; font-style: normal; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }
+.metric-company-header { display: grid; grid-template-columns: 32px minmax(0, 1fr) 56px 42px; gap: 8px; padding: 0 9px; color: #9aa7ba; font-size: 8px; line-height: 12px; }
+.metric-company-header span:first-child { grid-column: 2; }
+.metric-company-header span:nth-child(2), .metric-company-header span:nth-child(3) { text-align: right; }
+.metric-company-list { display: grid; overflow: hidden; border: 1px solid #e6ebf3; border-radius: 8px; background: #fff; }
+.metric-company-row { min-height: 50px; display: grid; grid-template-columns: 32px minmax(0, 1fr) 56px 42px; align-items: center; gap: 8px; padding: 8px 9px; border-bottom: 1px solid #eef2f7; background: #fff; }
+.metric-company-row:last-child { border-bottom: 0; }
+.metric-company-row.is-watch { background: #fffdf8; }
+.metric-company-row.is-risk { background: #fffafb; }
+.metric-company-avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: #3662ec; background: #edf3ff; font-size: 10px; font-weight: 700; }
+.metric-company-main { min-width: 0; }
+.metric-company-main div { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.metric-company-main b { overflow: hidden; color: #17213c; font-size: 11px; line-height: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.metric-company-main i { flex: none; padding: 1px 5px; border-radius: 99px; color: #59677d; background: #f1f4f8; font-size: 8px; font-style: normal; line-height: 12px; }
+.metric-company-main p { margin: 2px 0 5px; overflow: hidden; color: #8a96aa; font-size: 9px; line-height: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.metric-company-track { height: 5px; display: block; overflow: hidden; border-radius: 99px; background: #e8eef8; }
+.metric-company-track em { height: 100%; display: block; border-radius: inherit; background: #3662ec; }
+.metric-company-row.is-watch .metric-company-track em { background: #f59e0b; }
+.metric-company-row.is-risk .metric-company-track em { background: #f2485b; }
+.metric-company-measure { overflow: hidden; color: #17213c; font-size: 12px; line-height: 16px; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+.metric-company-score { color: #3662ec; font-size: 13px; line-height: 16px; text-align: right; white-space: nowrap; }
+.metric-company-score em { color: #8a96aa; font-size: 9px; font-style: normal; font-weight: 500; }
 .metric-item[open] { border-color: rgba(71, 122, 252, 0.22); }
 .metric-item summary { list-style: none; cursor: pointer; }
 .metric-item summary::-webkit-details-marker { display: none; }
