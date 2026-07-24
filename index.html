@@ -39,6 +39,37 @@
               <div id="sheet-content" class="sheet-content"></div>
             </section>
           </div>
+          <section id="company-page" class="company-page" aria-labelledby="company-page-title" hidden>
+            <header class="company-page-header">
+              <button class="company-back" type="button" data-close-company aria-label="返回">‹</button>
+              <div>
+                <span>统计范围</span>
+                <h2 id="company-page-title">切换公司</h2>
+              </div>
+            </header>
+            <div class="company-current">
+              <span>当前选中</span>
+              <strong id="company-current-name">大湾区区域公司</strong>
+            </div>
+            <label class="company-search">
+              <span aria-hidden="true"></span>
+              <input id="company-search-input" type="search" placeholder="搜索公司名称、区域或编码" autocomplete="off" />
+            </label>
+            <div id="company-result-meta" class="company-result-meta"></div>
+            <div id="company-list" class="company-list" role="listbox" aria-label="公司列表"></div>
+            <div id="company-confirm" class="company-confirm-layer" hidden>
+              <button class="company-confirm-backdrop" type="button" data-cancel-company aria-label="取消切换"></button>
+              <section class="company-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="company-confirm-title">
+                <span>切换确认</span>
+                <h3 id="company-confirm-title">确认切换公司？</h3>
+                <p id="company-confirm-copy"></p>
+                <div class="company-confirm-actions">
+                  <button type="button" data-cancel-company>取消</button>
+                  <button type="button" data-confirm-company>确认切换</button>
+                </div>
+              </section>
+            </div>
+          </section>
           <div id="prototype-toast" class="prototype-toast" role="status" aria-live="polite" hidden></div>
         </div>
       </section>

@@ -7,6 +7,14 @@
   const sheetTitle = document.getElementById("sheet-title");
   const sheetEyebrow = document.getElementById("sheet-eyebrow");
   const sheetContent = document.getElementById("sheet-content");
+  const companyPage = document.getElementById("company-page");
+  const companyCurrentName = document.getElementById("company-current-name");
+  const companySearchInput = document.getElementById("company-search-input");
+  const companyResultMeta = document.getElementById("company-result-meta");
+  const companyList = document.getElementById("company-list");
+  const companyConfirm = document.getElementById("company-confirm");
+  const companyConfirmTitle = document.getElementById("company-confirm-title");
+  const companyConfirmCopy = document.getElementById("company-confirm-copy");
   const toast = document.getElementById("prototype-toast");
   const files = {
     overview: "overview.html",
@@ -26,8 +34,21 @@
   let requestedRoute = "overview";
   let selectedScope = "大湾区区域公司";
   let activeIndicatorName = "经营";
+  let pendingScope = "";
   let toastTimer;
   let searchTimer;
+  const companies = [
+    { name: "集团总部", short: "集团", code: "HQ", region: "总部", type: "集团统筹", desc: "全集团经营、运营、内控、安全等指标总览", aliases: ["总部", "集团"] },
+    { name: "大湾区区域公司", short: "湾区", code: "GBA", region: "华南", type: "区域公司", desc: "深圳、广州、珠海等湾区项目经营管理", aliases: ["大湾区", "深圳", "广州"] },
+    { name: "华东区域公司", short: "华东", code: "EC", region: "华东", type: "区域公司", desc: "上海、杭州、南京项目群与区域经营数据", aliases: ["上海", "杭州", "南京"] },
+    { name: "华南区域公司", short: "华南", code: "SC", region: "华南", type: "区域公司", desc: "广东、广西、海南片区重点项目经营数据", aliases: ["广东", "广西", "海南"] },
+    { name: "华中区域公司", short: "华中", code: "CC", region: "华中", type: "区域公司", desc: "武汉、长沙、郑州等项目督办与运营数据", aliases: ["武汉", "长沙", "郑州"] },
+    { name: "华北区域公司", short: "华北", code: "NC", region: "华北", type: "区域公司", desc: "北京、天津、河北项目群综合经营数据", aliases: ["北京", "天津", "河北"] },
+    { name: "西南区域公司", short: "西南", code: "SW", region: "西南", type: "区域公司", desc: "成都、重庆、昆明片区风险与指标数据", aliases: ["成都", "重庆", "昆明"] },
+    { name: "西北区域公司", short: "西北", code: "NW", region: "西北", type: "区域公司", desc: "西安、兰州、银川项目经营与安全数据", aliases: ["西安", "兰州", "银川"] },
+    { name: "城市更新事业部", short: "更新", code: "UR", region: "专项", type: "事业部", desc: "城市更新专项项目、合同与利润进度", aliases: ["城市更新", "事业部"] },
+    { name: "智慧运营事业部", short: "智运", code: "SO", region: "专项", type: "事业部", desc: "数字化运营、工单、能耗与服务质量数据", aliases: ["智慧运营", "数字化"] }
+  ];
 
   const escapeHtml = value => String(value ?? "").replace(/[&<>\"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[character]));
 
@@ -95,6 +116,7 @@
     requestedRoute = route;
     closeModal();
     closeSheet();
+    closeCompanySelector();
     const frame = ensureFrame(route);
     if (frame.dataset.loaded === "true") {
       activateFrame(route);
@@ -143,16 +165,93 @@
 
   function closeModal() { modal.hidden = true; }
   function closeSheet() { sheet.hidden = true; sheetContent.innerHTML = ""; sheet.dataset.returnIndicator = ""; }
+  function closeCompanyConfirm() { companyConfirm.hidden = true; pendingScope = ""; }
+  function closeCompanySelector() {
+    closeCompanyConfirm();
+    companyPage.hidden = true;
+    companyPage.dataset.returnIndicator = "";
+  }
+
+  const normalizeSearch = value => String(value || "").toLowerCase().replace(/\s+/g, "");
+
+  function fuzzyMatch(source, query) {
+    const haystack = normalizeSearch(source);
+    const needle = normalizeSearch(query);
+    if (!needle) return true;
+    if (haystack.includes(needle)) return true;
+    let cursor = 0;
+    for (const character of needle) {
+      cursor = haystack.indexOf(character, cursor);
+      if (cursor === -1) return false;
+      cursor += 1;
+    }
+    return true;
+  }
+
+  function companySearchText(company) {
+    return [company.name, company.short, company.code, company.region, company.type, company.desc, ...(company.aliases || [])].join(" ");
+  }
+
+  function renderCompanySelector() {
+    const query = companySearchInput.value.trim();
+    const matches = companies.filter(company => fuzzyMatch(companySearchText(company), query));
+    companyCurrentName.textContent = selectedScope;
+    companyResultMeta.textContent = query ? `找到 ${matches.length} 个匹配公司` : `全部公司 ${companies.length} 家`;
+    companyList.innerHTML = matches.length
+      ? matches.map(company => {
+          const selected = company.name === selectedScope;
+          return `<button class="company-option ${selected ? "is-selected" : ""}" type="button" role="option" aria-selected="${selected}" data-company-option="${escapeHtml(company.name)}">
+            <span class="company-avatar">${escapeHtml(company.short)}</span>
+            <span class="company-option-main">
+              <span class="company-option-title"><b>${escapeHtml(company.name)}</b>${selected ? "<i>当前</i>" : ""}</span>
+              <p>${escapeHtml(company.code)} · ${escapeHtml(company.region)} · ${escapeHtml(company.desc)}</p>
+            </span>
+            <span class="company-check">✓</span>
+          </button>`;
+        }).join("")
+      : `<div class="company-empty">没有找到匹配公司，请尝试输入区域、公司简称或编码。</div>`;
+  }
+
+  function openCompanySelector(payload = {}) {
+    closeModal();
+    closeSheet();
+    closeCompanyConfirm();
+    companyPage.dataset.returnIndicator = payload.returnIndicator || "";
+    companySearchInput.value = "";
+    companyPage.hidden = false;
+    renderCompanySelector();
+    requestAnimationFrame(() => companySearchInput.focus());
+  }
+
+  function openCompanyConfirm(name) {
+    const company = companies.find(item => item.name === name);
+    if (!company) return;
+    pendingScope = company.name;
+    companyConfirmTitle.textContent = company.name === selectedScope ? "当前已选择该公司" : "确认切换公司？";
+    companyConfirmCopy.textContent = company.name === selectedScope
+      ? `当前统计范围已经是「${company.name}」，确认后将保持当前范围。`
+      : `将统计范围从「${selectedScope}」切换至「${company.name}」，所有已加载页面会同步刷新顶部公司名称。`;
+    companyConfirm.hidden = false;
+  }
+
+  function confirmCompanySelection() {
+    if (!pendingScope) return;
+    const returnIndicator = companyPage.dataset.returnIndicator;
+    selectedScope = pendingScope;
+    frames.forEach(frame => applyScope(frame));
+    closeCompanySelector();
+    showToast(`已切换至${selectedScope}`);
+    if (returnIndicator) openIndicator(returnIndicator);
+  }
 
   function openSheet(type, payload = {}) {
+    if (type === "scope") {
+      openCompanySelector(payload);
+      return;
+    }
     closeModal();
     sheet.hidden = false;
-    if (type === "scope") {
-      sheetEyebrow.textContent = "统计范围";
-      sheetTitle.textContent = "切换查看范围";
-      const options = ["集团总部", "大湾区区域公司", "华东区域公司", "华南区域公司"];
-      sheetContent.innerHTML = `<div class="sheet-list">${options.map(item => `<button class="sheet-option ${item === selectedScope ? "is-selected" : ""}" type="button" data-scope-option="${escapeHtml(item)}"><span>${item}</span><span>${item === selectedScope ? "✓" : ""}</span></button>`).join("")}</div>`;
-    } else if (type === "menu") {
+    if (type === "menu") {
       sheetEyebrow.textContent = "工作台设置";
       sheetTitle.textContent = "个人快捷操作";
       sheetContent.innerHTML = `<div class="sheet-list"><button class="menu-action" type="button" data-menu-action="profile"><span>个人信息与权限</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="notice"><span>消息通知设置</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="refresh"><span>刷新全部驾驶舱数据</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="about"><span>关于企业经营管理驾驶舱</span><span>›</span></button></div>`;
@@ -206,15 +305,20 @@
     result.innerHTML = matches.map(item => `<button type="button" class="sheet-option" data-search-result="${escapeHtml(item[0])}"><span><b>${escapeHtml(item[0])}</b><small style="display:block;color:#8a96aa;margin-top:3px;font-size:9px">${escapeHtml(item[1])}</small></span><span class="status-pill">${escapeHtml(item[2])}</span></button>`).join("");
   }
 
+  companySearchInput.addEventListener("input", renderCompanySelector);
+
   document.addEventListener("click", event => {
-    const target = event.target.closest("[data-close-modal], [data-close-sheet], [data-scope-option], [data-menu-action], [data-search-result], [data-open-indicator], [data-modal-scope]");
+    const target = event.target.closest("[data-close-modal], [data-close-sheet], [data-close-company], [data-company-option], [data-confirm-company], [data-cancel-company], [data-scope-option], [data-menu-action], [data-search-result], [data-open-indicator], [data-modal-scope]");
     if (!target) return;
     if (target.dataset.closeModal !== undefined) closeModal();
     if (target.dataset.closeSheet !== undefined) closeSheet();
+    if (target.dataset.closeCompany !== undefined) closeCompanySelector();
+    if (target.dataset.companyOption) openCompanyConfirm(target.dataset.companyOption);
+    if (target.dataset.cancelCompany !== undefined) closeCompanyConfirm();
+    if (target.dataset.confirmCompany !== undefined) confirmCompanySelection();
     if (target.dataset.modalScope !== undefined) {
       const returnIndicator = activeIndicatorName;
-      openSheet("scope");
-      sheet.dataset.returnIndicator = returnIndicator;
+      openCompanySelector({ returnIndicator });
     }
     if (target.dataset.scopeOption) {
       const returnIndicator = sheet.dataset.returnIndicator;
@@ -229,7 +333,13 @@
     if (target.dataset.openIndicator) { const name = target.dataset.openIndicator; closeSheet(); openIndicator(name); }
   });
 
-  document.addEventListener("keydown", event => { if (event.key === "Escape") { closeModal(); closeSheet(); } });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      if (!companyConfirm.hidden) closeCompanyConfirm();
+      else if (!companyPage.hidden) closeCompanySelector();
+      else { closeModal(); closeSheet(); }
+    }
+  });
   window.addEventListener("message", event => {
     const message = event.data;
     if (!message || message.source !== "mastergo-prototype") return;
