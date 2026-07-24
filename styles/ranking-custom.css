@@ -3,12 +3,12 @@
 .custom-section-title { display: flex; align-items: center; gap: 5px; color: #1a2540; font-size: 14px; font-weight: 700; }
 .custom-section-title::before { content: ""; width: 4px; height: 16px; border-radius: 1px; background: #00d5db; }
 .custom-section-note { color: #8898b4; font-size: 10px; }
-[data-prototype-search] { width: 100% !important; height: 41px !important; padding: 0 !important; }
-.prototype-page-search { width: 100%; height: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr); align-items: center; gap: 8px; padding: 0 14px; }
+[data-prototype-search] { width: 100% !important; height: 100% !important; padding: 0 !important; }
+.prototype-page-search { width: 100%; height: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr); align-items: center; gap: 8px; padding: 0 14px; border-radius: inherit; background: transparent; box-sizing: border-box; }
 .prototype-page-search span { position: relative; width: 14px; height: 14px; display: block; }
 .prototype-page-search span::before { content: ""; position: absolute; left: 1px; top: 1px; width: 8px; height: 8px; border: 1.4px solid #477afc; border-radius: 50%; }
 .prototype-page-search span::after { content: ""; position: absolute; left: 8px; top: 9px; width: 5px; height: 1.4px; border-radius: 2px; background: #477afc; transform: rotate(45deg); transform-origin: left center; }
-.prototype-page-search input { min-width: 0; border: 0; outline: 0; color: #1a2540; background: transparent; font: inherit; font-size: 12px; line-height: 18px; }
+.prototype-page-search input { width: 100%; min-width: 0; height: 100%; border: 0; outline: 0; color: #1a2540; background: transparent; font-family: AlibabaPuHuiTi, "Noto Sans SC", sans-serif; font-size: 12px; line-height: 18px; }
 .prototype-page-search input::placeholder { color: #999; }
 .custom-card { width: 100%; max-width: 100%; overflow: hidden; border: 1px solid rgba(30, 50, 120, 0.07); border-radius: 12px; background: #fff; box-shadow: 0 1px 8px rgba(30, 50, 120, 0.07); box-sizing: border-box; }
 .custom-metric-card { display: flex; flex-direction: column; }
