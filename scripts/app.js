@@ -38,6 +38,109 @@
   let toastTimer;
   let searchTimer;
   const domains = ["经营", "运营", "内控", "舆情", "创新", "安全"];
+  const routeLabels = {
+    overview: "总览",
+    ranking: "排行",
+    supervision: "督办"
+  };
+  const menuActions = [
+    { key: "profile", title: "个人中心", desc: "密码修改、名称修改与权限信息", badge: "账" },
+    { key: "notice", title: "消息通知", desc: "手机提醒授权、微信与悬浮提醒", badge: "消" },
+    { key: "refresh", title: "刷新数据", desc: "刷新日志、接口异常与同步状态", badge: "刷" },
+    { key: "about", title: "关于系统", desc: "产品说明、版本发布与新功能指引", badge: "版" }
+  ];
+  const feedRecords = [
+    {
+      id: "feed-supervision-001",
+      module: "督办",
+      date: "2026-07-29 09:20",
+      title: "华中区域公司重点工作进度更新",
+      summary: "武汉金融城项目停车场改造事项新增节点反馈，当前进入采购比价阶段。",
+      company: "华中区域公司",
+      project: "武汉金融城综合物业项目",
+      projectCode: "CC-WH-023",
+      owner: "周敏",
+      role: "华中区域公司项目负责人",
+      phone: "138-0271-5608",
+      status: "推进中",
+      priority: "重点工作",
+      source: "督办台账",
+      nextStep: "7月31日前完成供应商比价，8月3日前提交改造排期。",
+      history: ["2026-07-29 09:20 采购清单已补充完成", "2026-07-28 16:10 现场施工边界已确认", "2026-07-26 10:30 事项纳入重点督办"]
+    },
+    {
+      id: "feed-ranking-001",
+      module: "排行",
+      date: "2026-07-29 08:50",
+      title: "西南区域公司收缴率排行预警",
+      summary: "西南区域本月综合收缴率低于总部均值，成都城南项目贡献主要偏差。",
+      company: "西南区域公司",
+      project: "成都城南政务中心项目",
+      projectCode: "SW-CD-017",
+      owner: "李文强",
+      role: "西南区域公司经营负责人",
+      phone: "139-0803-4126",
+      status: "预警",
+      priority: "经营风险",
+      source: "排行分析",
+      nextStep: "跟进逾期大额客户回款，7月30日前反馈专项清收计划。",
+      history: ["2026-07-29 08:50 收缴率排行触发预警", "2026-07-28 18:00 应收明细完成核对", "2026-07-27 11:20 项目经理提交回款说明"]
+    },
+    {
+      id: "feed-overview-001",
+      module: "总览",
+      date: "2026-07-28 18:05",
+      title: "智慧运营公司能耗数据同步完成",
+      summary: "深圳湾园区项目能耗指标完成口径校准，已同步到运营指标卡片。",
+      company: "智慧运营公司",
+      project: "深圳湾智慧园区项目",
+      projectCode: "SO-SZ-009",
+      owner: "陈晓琳",
+      role: "智慧运营公司运营负责人",
+      phone: "137-9832-6115",
+      status: "已同步",
+      priority: "基础工作",
+      source: "总览指标",
+      nextStep: "持续观察本周空调主机能耗，异常波动超过5%自动提醒。",
+      history: ["2026-07-28 18:05 能耗数据同步完成", "2026-07-28 15:40 数据接口完成重试", "2026-07-28 10:15 项目侧确认计量点位"]
+    },
+    {
+      id: "feed-supervision-002",
+      module: "督办",
+      date: "2026-07-28 14:12",
+      title: "公建服务公司接口异常回退记录",
+      summary: "督办接口返回空值，系统已回退缓存数据并记录项目责任人。",
+      company: "公建服务公司",
+      project: "市民中心公共建筑服务项目",
+      projectCode: "PB-SZ-031",
+      owner: "王凯",
+      role: "公建服务公司信息联络人",
+      phone: "136-0308-7752",
+      status: "待复核",
+      priority: "接口异常",
+      source: "数据同步",
+      nextStep: "信息化接口组复核空值字段，项目负责人确认当日督办状态。",
+      history: ["2026-07-28 14:12 接口返回空值并回退缓存", "2026-07-28 14:05 自动重试2次未恢复", "2026-07-28 13:55 同步任务启动"]
+    },
+    {
+      id: "feed-overview-002",
+      module: "总览",
+      date: "2026-07-27 17:30",
+      title: "园区运营公司收入合约额更新",
+      summary: "南山科技园项目新增服务合约已归集到总部经营指标。",
+      company: "园区运营公司",
+      project: "南山科技园综合运营项目",
+      projectCode: "PO-SZ-015",
+      owner: "赵嘉怡",
+      role: "园区运营公司商务负责人",
+      phone: "135-1019-2488",
+      status: "已更新",
+      priority: "经营数据",
+      source: "总览指标",
+      nextStep: "8月5日前完成合同归档，并同步首期回款计划。",
+      history: ["2026-07-27 17:30 合约额更新到总览", "2026-07-27 15:10 商务系统完成合同复核", "2026-07-26 09:40 项目提交新增合同"]
+    }
+  ];
   const companies = [
     { name: "深圳市天健城市服务有限公司", short: "天健", code: "HQ", region: "总部", type: "归集主体", desc: "各区域公司与专业公司经营数据归集主体", aliases: ["总部", "集团", "天健城市服务"] },
     { name: "大湾区区域公司", short: "湾区", code: "GBA", region: "华南", type: "区域公司", desc: "深圳、广州、珠海等湾区项目经营管理", aliases: ["大湾区", "深圳", "广州"] },
@@ -496,6 +599,98 @@
     return `占比 ${Math.max(0, row.amount / total * 100).toFixed(1)}%`;
   }
 
+  function scopedFeedRecords() {
+    if (selectedScope === headquarterName) return feedRecords;
+    const matched = feedRecords.filter(item => item.company === selectedScope);
+    return matched.length ? matched : feedRecords.map(item => ({ ...item, company: selectedScope })).slice(0, 3);
+  }
+
+  function feedStatusClass(status) {
+    if (status.includes("预警") || status.includes("异常")) return "danger";
+    if (status.includes("待") || status.includes("推进")) return "warn";
+    return "";
+  }
+
+  function renderFeedList() {
+    const records = scopedFeedRecords();
+    const warningCount = records.filter(item => feedStatusClass(item.status)).length;
+    return `
+      <div class="feed-workbench">
+        <article class="feed-summary">
+          <span>当前范围</span>
+          <strong>${escapeHtml(selectedScope)}</strong>
+          <p>共 ${records.length} 条更新，其中 ${warningCount} 条需要关注。点击任一事项可查看公司、项目、负责人和联系电话。</p>
+        </article>
+        <div class="feed-list">
+          ${records.map(record => `
+            <button class="feed-item" type="button" data-feed-id="${escapeHtml(record.id)}">
+              <span class="feed-item-top">
+                <i>${escapeHtml(record.module)}</i>
+                <em>${escapeHtml(record.date)}</em>
+              </span>
+              <b>${escapeHtml(record.title)}</b>
+              <small>${escapeHtml(record.summary)}</small>
+              <span class="feed-item-meta">
+                <span>${escapeHtml(record.company)}</span>
+                <span>${escapeHtml(record.project)}</span>
+              </span>
+              <span class="feed-item-foot">
+                <span class="status-pill ${feedStatusClass(record.status)}">${escapeHtml(record.status)}</span>
+                <span>${escapeHtml(record.owner)} · ${escapeHtml(record.phone)}</span>
+              </span>
+            </button>
+          `).join("")}
+        </div>
+      </div>`;
+  }
+
+  function renderFeedDetail(id) {
+    const record = scopedFeedRecords().find(item => item.id === id) || feedRecords[0];
+    return `
+      <div class="feed-detail">
+        <div class="settings-page-head">
+          <button class="settings-back" type="button" data-feed-back aria-label="返回">‹</button>
+          <div class="settings-page-copy">
+            <span>${escapeHtml(record.module)}动态</span>
+            <strong>${escapeHtml(record.title)}</strong>
+            <p>${escapeHtml(record.date)} · ${escapeHtml(record.status)}</p>
+          </div>
+        </div>
+        <article class="feed-detail-card">
+          <span class="status-pill ${feedStatusClass(record.status)}">${escapeHtml(record.priority)}</span>
+          <h3>${escapeHtml(record.title)}</h3>
+          <p>${escapeHtml(record.summary)}</p>
+        </article>
+        <div class="feed-info-grid">
+          <div><b>相关公司</b><span>${escapeHtml(record.company)}</span></div>
+          <div><b>相关项目</b><span>${escapeHtml(record.project)}</span></div>
+          <div><b>项目编码</b><span>${escapeHtml(record.projectCode)}</span></div>
+          <div><b>数据来源</b><span>${escapeHtml(record.source)}</span></div>
+        </div>
+        <article class="feed-contact">
+          <div>
+            <span>公司负责人</span>
+            <strong>${escapeHtml(record.owner)}</strong>
+            <p>${escapeHtml(record.role)}</p>
+          </div>
+          <button type="button" data-call-owner="${escapeHtml(record.phone)}">联系 ${escapeHtml(record.phone)}</button>
+        </article>
+        <article class="feed-detail-card">
+          <h3>下一步计划</h3>
+          <p>${escapeHtml(record.nextStep)}</p>
+        </article>
+        <details class="settings-disclosure" open>
+          <summary>更新记录</summary>
+          <div class="settings-log-list">
+            ${record.history.map(item => {
+              const parts = item.split(" ");
+              return `<div class="settings-log-item"><b>${escapeHtml(parts.slice(0, 2).join(" "))}</b><span>${escapeHtml(parts.slice(2).join(" "))}</span></div>`;
+            }).join("")}
+          </div>
+        </details>
+      </div>`;
+  }
+
   function renderAggregationBreakdown(label) {
     const metric = aggregationMetrics[label] || aggregationMetrics.营业总收入;
     const rows = aggregationRows(metric);
@@ -680,6 +875,494 @@
     if (returnIndicator) openIndicator(returnIndicator);
   }
 
+  function currentRouteTitle() {
+    if (routeLabels[currentRoute]) return routeLabels[currentRoute];
+    if (String(currentRoute || "").startsWith("ranking")) return "排行";
+    return "总览";
+  }
+
+  function renderMenuSheet() {
+    return `
+      <div class="menu-sheet">
+        <section class="menu-hero">
+          <div class="menu-hero-top">
+            <div class="menu-hero-avatar" aria-hidden="true">集</div>
+            <div class="menu-hero-copy">
+              <strong>集团管理用户</strong>
+              <span>总部经营管理部</span>
+            </div>
+          </div>
+          <div class="menu-hero-tags">
+            <span>当前范围</span>
+            <strong>${escapeHtml(selectedScope)}</strong>
+            <span>当前页面</span>
+            <strong>${escapeHtml(currentRouteTitle())}</strong>
+          </div>
+        </section>
+        <section class="menu-section">
+          <div class="menu-section-head">
+            <span>个人设置</span>
+            <em>账号与消息</em>
+          </div>
+          <div class="menu-quick-list">
+            ${menuActions.map(item => `
+              <button class="menu-quick-item" type="button" data-menu-action="${item.key}">
+                <span class="menu-quick-badge">${escapeHtml(item.badge)}</span>
+                <span class="menu-quick-main">
+                  <b>${escapeHtml(item.title)}</b>
+                  <small>${escapeHtml(item.desc)}</small>
+                </span>
+                <i>›</i>
+              </button>
+            `).join("")}
+          </div>
+        </section>
+        <button class="menu-signout" type="button" data-menu-action="logout">
+          <span>
+            <b>退出登录</b>
+            <small>安全退出当前账号</small>
+          </span>
+          <i>↗</i>
+        </button>
+      </div>`;
+  }
+
+  function handleMenuAction(key) {
+    if (key === "profile") {
+      openSheet("menu-setting", { key: "profile" });
+      return;
+    }
+    if (key === "notice") {
+      openSheet("menu-setting", { key: "notice" });
+      return;
+    }
+    if (key === "refresh") {
+      openSheet("menu-setting", { key: "refresh" });
+      return;
+    }
+    if (key === "about") {
+      openSheet("menu-setting", { key: "about" });
+      return;
+    }
+    if (key === "logout") {
+      openSheet("logout-confirm");
+    }
+  }
+
+  function renderSettingSheet(key) {
+    if (key === "profile") {
+      return `
+        <div class="settings-page">
+          <div class="settings-page-head">
+            <button class="settings-back" type="button" data-setting-back aria-label="返回">‹</button>
+            <div class="settings-page-copy">
+              <span>个人设置</span>
+              <strong>个人中心</strong>
+              <p>账号维护、名称信息和权限核对</p>
+            </div>
+          </div>
+          <div class="settings-stack">
+            <article class="settings-summary">
+              <span>个人中心</span>
+              <strong>密码修改、名称修改与权限核对</strong>
+              <p>统一放在同一页内，减少层级切换，便于快速核对和修改。</p>
+            </article>
+            <article class="settings-panel">
+              <h3>修改密码</h3>
+              <p>更新当前登录密码，满足安全策略。</p>
+              <label class="settings-field"><span>当前密码</span><input type="password" placeholder="请输入当前密码" /></label>
+              <label class="settings-field"><span>新密码</span><input type="password" placeholder="请输入新密码" /></label>
+              <label class="settings-field"><span>确认新密码</span><input type="password" placeholder="再次输入新密码" /></label>
+              <div class="settings-actions">
+                <button class="settings-primary" type="button" data-setting-submit="profile-password">提交修改</button>
+              </div>
+            </article>
+            <article class="settings-panel">
+              <h3>名称修改</h3>
+              <p>统一工作台展示名称和签名信息。</p>
+              <label class="settings-field"><span>当前名称</span><input type="text" value="集团管理用户" /></label>
+              <label class="settings-field"><span>展示签名</span><input type="text" value="总部经营管理部" /></label>
+              <div class="settings-actions">
+                <button class="settings-primary" type="button" data-setting-submit="profile-name">保存修改</button>
+              </div>
+            </article>
+            <article class="settings-panel">
+              <h3>角色与权限</h3>
+              <p>当前账号具有驾驶舱查看、数据穿透与督办跟进权限。</p>
+              <div class="settings-mini-list">
+                <div class="settings-mini-item"><b>角色</b><span>总部经营管理部</span></div>
+                <div class="settings-mini-item"><b>权限范围</b><span>总览、排行、督办、公司切换</span></div>
+                <div class="settings-mini-item"><b>数据层级</b><span>集团总部 / 区域公司 / 专业公司</span></div>
+              </div>
+            </article>
+          </div>
+        </div>`;
+    }
+    if (key === "notice") {
+      return `
+        <div class="settings-page">
+          <div class="settings-page-head">
+            <button class="settings-back" type="button" data-setting-back aria-label="返回">‹</button>
+            <div class="settings-page-copy">
+              <span>个人设置</span>
+              <strong>消息通知</strong>
+              <p>提醒授权、悬浮提示与免打扰设置</p>
+            </div>
+          </div>
+          <div class="settings-stack">
+            <article class="settings-summary">
+              <span>消息通知</span>
+              <strong>手机提醒、悬浮提醒与授权设置</strong>
+              <p>把授权、显示和静默时间放在一页里，减少点进点出的成本。</p>
+            </article>
+            <article class="settings-panel">
+              <h3>消息授权</h3>
+              <p>管理短信、App 推送和微信提醒的授权方式。</p>
+              <div class="settings-switch-list">
+                <label class="settings-switch"><input type="checkbox" checked /><span><b>短信提醒</b><small>接收关键预警短信</small></span></label>
+                <label class="settings-switch"><input type="checkbox" checked /><span><b>App 推送</b><small>接收移动端消息推送</small></span></label>
+                <label class="settings-switch"><input type="checkbox" checked /><span><b>微信提醒</b><small>接收企业微信通知</small></span></label>
+              </div>
+            </article>
+            <article class="settings-panel">
+              <h3>悬浮提醒设置</h3>
+              <p>控制工作台右下角悬浮提醒的显示频率和停留时间。</p>
+              <div class="settings-switch-list">
+                <label class="settings-switch"><input type="checkbox" checked /><span><b>显示悬浮提醒</b><small>在重要提醒到达时弹出</small></span></label>
+                <label class="settings-switch"><input type="checkbox" checked /><span><b>显示倒计时</b><small>展示待办临近截止时间</small></span></label>
+              </div>
+            </article>
+            <article class="settings-panel">
+              <h3>免打扰时段</h3>
+              <p>设置夜间或会议期间的静默时间，避免打断阅读。</p>
+              <label class="settings-field"><span>开始时间</span><input type="text" value="22:00" /></label>
+              <label class="settings-field"><span>结束时间</span><input type="text" value="08:00" /></label>
+              <div class="settings-actions">
+                <button class="settings-primary" type="button" data-setting-submit="notice-dnd">保存设置</button>
+              </div>
+            </article>
+            <article class="settings-panel">
+              <h3>微信消息提示</h3>
+              <p>选择消息推送到企业微信、个人微信或两者同时发送。</p>
+              <div class="settings-mini-list">
+                <div class="settings-mini-item"><b>企业微信</b><span>已授权，默认开启</span></div>
+                <div class="settings-mini-item"><b>个人微信</b><span>待确认授权状态</span></div>
+              </div>
+              <div class="settings-actions">
+                <button class="settings-primary" type="button" data-setting-submit="notice-wechat">更新授权</button>
+              </div>
+            </article>
+          </div>
+        </div>`;
+    }
+    if (key === "refresh") {
+      return `
+        <div class="settings-page">
+          <div class="settings-page-head">
+            <button class="settings-back" type="button" data-setting-back aria-label="返回">‹</button>
+            <div class="settings-page-copy">
+              <span>个人设置</span>
+              <strong>刷新数据</strong>
+              <p>日志、异常与同步状态</p>
+            </div>
+          </div>
+          <div class="settings-stack">
+            <article class="settings-summary">
+              <span>刷新数据</span>
+              <strong>刷新日志与接口异常记录</strong>
+              <p>先保留一个主动作，再把历史记录和异常记录展开显示，避免页面跳转。</p>
+            </article>
+            <article class="settings-panel">
+              <h3>数据刷新</h3>
+              <p>执行一次当前驾驶舱数据刷新，并查看同步状态。</p>
+              <div class="settings-actions">
+                <button class="settings-primary" type="button" data-setting-submit="refresh-now">立即刷新</button>
+              </div>
+            </article>
+            <details class="settings-disclosure" open>
+              <summary>历史刷新日志</summary>
+              <div class="settings-log-list">
+                <div class="settings-log-item"><b>2026-07-29 09:20</b><span>刷新完成 · 总览、排行、督办数据同步成功</span></div>
+                <div class="settings-log-item"><b>2026-07-28 18:05</b><span>刷新完成 · 公司切换与指标卡片更新成功</span></div>
+                <div class="settings-log-item"><b>2026-07-28 08:40</b><span>刷新完成 · 排行与督办列表同步成功</span></div>
+              </div>
+            </details>
+            <details class="settings-disclosure">
+              <summary>接口异常记录</summary>
+              <div class="settings-log-list">
+                <div class="settings-log-item is-warn"><b>2026-07-29 08:30</b><span>指标接口超时，已自动重试 2 次</span></div>
+                <div class="settings-log-item is-warn"><b>2026-07-28 14:12</b><span>督办接口返回空值，已回退到缓存数据</span></div>
+                <div class="settings-log-item is-warn"><b>2026-07-27 11:08</b><span>公司层级接口字段缺失，已记录待修复</span></div>
+              </div>
+            </details>
+          </div>
+        </div>`;
+    }
+    if (key === "about") {
+      return `
+        <div class="settings-page">
+          <div class="settings-page-head">
+            <button class="settings-back" type="button" data-setting-back aria-label="返回">‹</button>
+            <div class="settings-page-copy">
+              <span>个人设置</span>
+              <strong>关于系统</strong>
+              <p>产品说明、版本发布与功能指引</p>
+            </div>
+          </div>
+          <div class="settings-stack">
+            <article class="settings-summary">
+              <span>关于系统</span>
+              <strong>产品说明、版本发布与新功能指引</strong>
+              <p>把说明性内容放在一个页面里，适合快速浏览，不必层层下钻。</p>
+            </article>
+            <article class="settings-panel">
+              <h3>产品说明</h3>
+              <p>本系统用于企业经营管理驾驶舱展示，覆盖总览、排行、督办、公司切换与指标分析。</p>
+              <div class="settings-mini-list">
+                <div class="settings-mini-item"><b>展示范围</b><span>集团总部、区域公司、专业公司</span></div>
+                <div class="settings-mini-item"><b>核心目标</b><span>辅助领导快速阅读与穿透查看</span></div>
+              </div>
+            </article>
+            <article class="settings-panel">
+              <h3>版本发布</h3>
+              <p>查看最近版本发布摘要与本次变更。</p>
+              <div class="settings-log-list">
+                <div class="settings-log-item"><b>v1.4.2</b><span>优化个人设置、通知授权与刷新日志弹窗</span></div>
+                <div class="settings-log-item"><b>v1.4.1</b><span>补充排行和督办检索体验</span></div>
+                <div class="settings-log-item"><b>v1.4.0</b><span>完善公司切换与数据归集逻辑</span></div>
+              </div>
+            </article>
+            <article class="settings-panel">
+              <h3>新功能指引</h3>
+              <p>快速了解新增功能的入口和用途。</p>
+              <div class="settings-mini-list">
+                <div class="settings-mini-item"><b>公司切换</b><span>点击顶部范围，切换统计主体</span></div>
+                <div class="settings-mini-item"><b>排行筛选</b><span>按月、季、年查看不同维度排行</span></div>
+                <div class="settings-mini-item"><b>督办历史</b><span>查看更新记录与流程节点</span></div>
+              </div>
+            </article>
+          </div>
+        </div>`;
+    }
+    return "";
+  }
+
+  function renderSettingDetailSheet(key) {
+    if (key === "profile-password") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>修改密码</h3>
+            <p>输入当前密码并设置新密码，提交后同步更新登录凭据。</p>
+            <label class="settings-field"><span>当前密码</span><input type="password" placeholder="请输入当前密码" /></label>
+            <label class="settings-field"><span>新密码</span><input type="password" placeholder="请输入新密码" /></label>
+            <label class="settings-field"><span>确认新密码</span><input type="password" placeholder="再次输入新密码" /></label>
+            <div class="settings-actions">
+              <button class="settings-primary" type="button" data-setting-submit="profile-password">提交修改</button>
+              <button class="settings-secondary" type="button" data-close-sheet>取消</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "profile-name") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>名称修改</h3>
+            <p>修改当前显示名称与签名信息，便于统一工作台展示。</p>
+            <label class="settings-field"><span>当前名称</span><input type="text" value="集团管理用户" /></label>
+            <label class="settings-field"><span>展示签名</span><input type="text" value="总部经营管理部" /></label>
+            <div class="settings-actions">
+              <button class="settings-primary" type="button" data-setting-submit="profile-name">保存修改</button>
+              <button class="settings-secondary" type="button" data-close-sheet>取消</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "profile-role") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>角色与权限</h3>
+            <p>当前账号具有驾驶舱查看、数据穿透与督办跟进权限。</p>
+            <div class="settings-mini-list">
+              <div class="settings-mini-item"><b>角色</b><span>总部经营管理部</span></div>
+              <div class="settings-mini-item"><b>权限范围</b><span>总览、排行、督办、公司切换</span></div>
+              <div class="settings-mini-item"><b>数据层级</b><span>集团总部 / 区域公司 / 专业公司</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-secondary" type="button" data-close-sheet>关闭</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "notice-phone") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>手机信息提醒授权</h3>
+            <p>管理短信、App 推送和微信提醒的授权方式。</p>
+            <div class="settings-switch-list">
+              <label class="settings-switch"><input type="checkbox" checked /><span><b>短信提醒</b><small>接收关键预警短信</small></span></label>
+              <label class="settings-switch"><input type="checkbox" checked /><span><b>App 推送</b><small>接收移动端消息推送</small></span></label>
+              <label class="settings-switch"><input type="checkbox" checked /><span><b>微信提醒</b><small>接收企业微信通知</small></span></label>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-primary" type="button" data-setting-submit="notice-phone">保存设置</button>
+              <button class="settings-secondary" type="button" data-close-sheet>取消</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "notice-floating") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>悬浮提醒设置</h3>
+            <p>控制工作台右下角悬浮提醒的显示频率和停留时间。</p>
+            <div class="settings-switch-list">
+              <label class="settings-switch"><input type="checkbox" checked /><span><b>显示悬浮提醒</b><small>在重要提醒到达时弹出</small></span></label>
+              <label class="settings-switch"><input type="checkbox" checked /><span><b>显示倒计时</b><small>展示待办临近截止时间</small></span></label>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-primary" type="button" data-setting-submit="notice-floating">保存设置</button>
+              <button class="settings-secondary" type="button" data-close-sheet>取消</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "notice-wechat") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>微信消息提示</h3>
+            <p>选择消息推送到企业微信、个人微信或两者同时发送。</p>
+            <div class="settings-mini-list">
+              <div class="settings-mini-item"><b>企业微信</b><span>已授权，默认开启</span></div>
+              <div class="settings-mini-item"><b>个人微信</b><span>待确认授权状态</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-primary" type="button" data-setting-submit="notice-wechat">更新授权</button>
+              <button class="settings-secondary" type="button" data-close-sheet>取消</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "notice-dnd") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>免打扰时段</h3>
+            <p>设置夜间或会议期间的静默时间，避免打断阅读。</p>
+            <label class="settings-field"><span>开始时间</span><input type="text" value="22:00" /></label>
+            <label class="settings-field"><span>结束时间</span><input type="text" value="08:00" /></label>
+            <div class="settings-actions">
+              <button class="settings-primary" type="button" data-setting-submit="notice-dnd">保存设置</button>
+              <button class="settings-secondary" type="button" data-close-sheet>取消</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "refresh-history") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>历史刷新日志</h3>
+            <p>查看最近几次驾驶舱数据刷新记录和结果状态。</p>
+            <div class="settings-log-list">
+              <div class="settings-log-item"><b>2026-07-29 09:20</b><span>刷新完成 · 总览、排行、督办数据同步成功</span></div>
+              <div class="settings-log-item"><b>2026-07-28 18:05</b><span>刷新完成 · 公司切换与指标卡片更新成功</span></div>
+              <div class="settings-log-item"><b>2026-07-28 08:40</b><span>刷新完成 · 排行与督办列表同步成功</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-secondary" type="button" data-close-sheet>关闭</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "refresh-error") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>接口异常记录</h3>
+            <p>查看同步失败、超时和重试记录，便于定位数据源问题。</p>
+            <div class="settings-log-list">
+              <div class="settings-log-item is-warn"><b>2026-07-29 08:30</b><span>指标接口超时，已自动重试 2 次</span></div>
+              <div class="settings-log-item is-warn"><b>2026-07-28 14:12</b><span>督办接口返回空值，已回退到缓存数据</span></div>
+              <div class="settings-log-item is-warn"><b>2026-07-27 11:08</b><span>公司层级接口字段缺失，已记录待修复</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-secondary" type="button" data-close-sheet>关闭</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "about-product") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>产品说明</h3>
+            <p>本系统用于企业经营管理驾驶舱展示，覆盖总览、排行、督办、公司切换与指标分析。</p>
+            <div class="settings-mini-list">
+              <div class="settings-mini-item"><b>展示范围</b><span>集团总部、区域公司、专业公司</span></div>
+              <div class="settings-mini-item"><b>核心目标</b><span>辅助领导快速阅读与穿透查看</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-secondary" type="button" data-close-sheet>关闭</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "about-version") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>版本发布</h3>
+            <p>查看最近版本发布摘要与本次变更。</p>
+            <div class="settings-log-list">
+              <div class="settings-log-item"><b>v1.4.2</b><span>优化个人设置、通知授权与刷新日志弹窗</span></div>
+              <div class="settings-log-item"><b>v1.4.1</b><span>补充排行和督办检索体验</span></div>
+              <div class="settings-log-item"><b>v1.4.0</b><span>完善公司切换与数据归集逻辑</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-secondary" type="button" data-close-sheet>关闭</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "about-guide") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel">
+            <h3>新功能指引</h3>
+            <p>快速了解新增功能的入口和用途。</p>
+            <div class="settings-mini-list">
+              <div class="settings-mini-item"><b>公司切换</b><span>点击顶部范围，切换统计主体</span></div>
+              <div class="settings-mini-item"><b>排行筛选</b><span>按月、季、年查看不同维度排行</span></div>
+              <div class="settings-mini-item"><b>督办历史</b><span>查看更新记录与流程节点</span></div>
+            </div>
+            <div class="settings-actions">
+              <button class="settings-secondary" type="button" data-close-sheet>关闭</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    if (key === "logout-confirm") {
+      return `
+        <div class="settings-detail">
+          <article class="settings-panel settings-panel-danger">
+            <h3>确认退出登录</h3>
+            <p>退出后将结束当前账号会话。是否继续？</p>
+            <div class="settings-actions">
+              <button class="settings-primary danger" type="button" data-confirm-logout>确认退出</button>
+              <button class="settings-secondary" type="button" data-close-sheet>取消</button>
+            </div>
+          </article>
+        </div>`;
+    }
+    return "";
+  }
+
   function openSheet(type, payload = {}) {
     if (type === "scope") {
       openCompanySelector(payload);
@@ -688,9 +1371,25 @@
     closeModal();
     sheet.hidden = false;
     if (type === "menu") {
-      sheetEyebrow.textContent = "工作台设置";
-      sheetTitle.textContent = "个人快捷操作";
-      sheetContent.innerHTML = `<div class="sheet-list"><button class="menu-action" type="button" data-menu-action="profile"><span>个人信息与权限</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="notice"><span>消息通知设置</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="refresh"><span>刷新全部驾驶舱数据</span><span>›</span></button><button class="menu-action" type="button" data-menu-action="about"><span>关于企业经营管理驾驶舱</span><span>›</span></button></div>`;
+      sheetEyebrow.textContent = "工作台快捷入口";
+      sheetTitle.textContent = "个人设置";
+      sheetContent.innerHTML = renderMenuSheet();
+    } else if (type === "menu-setting") {
+      const key = payload.key || "profile";
+      const map = {
+        profile: ["个人中心", "账号、密码与权限"],
+        notice: ["消息通知", "提醒授权与触达设置"],
+        refresh: ["刷新数据", "日志与异常记录"],
+        about: ["关于系统", "产品说明与版本信息"]
+      };
+      const meta = map[key] || map.profile;
+      sheetEyebrow.textContent = meta[0];
+      sheetTitle.textContent = meta[1];
+      sheetContent.innerHTML = renderSettingSheet(key);
+    } else if (type === "logout-confirm") {
+      sheetEyebrow.textContent = "退出登录";
+      sheetTitle.textContent = "确认退出当前账号";
+      sheetContent.innerHTML = renderSettingDetailSheet("logout-confirm");
     } else if (type === "aggregation") {
       const label = aggregationMetrics[payload.metric] ? payload.metric : "营业总收入";
       sheetEyebrow.textContent = "数据穿透";
@@ -698,14 +1397,13 @@
       sheetContent.innerHTML = renderAggregationBreakdown(label);
     } else if (type === "feed") {
       sheetEyebrow.textContent = "动态中心";
-      sheetTitle.textContent = "最近更新动态";
-      const items = [
-        ["2026-07-21", "华中区域公司督办事项更新", "4 项事项新增跟进记录", "已更新"],
-        ["2026-07-20", "安全隐患闭环数据同步", "西南区域新增 12 条闭环记录", "已同步"],
-        ["2026-07-18", "经营指标口径完成校准", "收入、利润与现金流指标已校准", "已完成"],
-        ["2026-07-16", "客户满意度月度数据更新", "本月有效样本 2,184 份", "已更新"]
-      ];
-      sheetContent.innerHTML = `<div class="sheet-list">${items.map(item => `<article class="sheet-card"><h3>${item[1]} <span class="status-pill">${item[3]}</span></h3><p>${item[2]}</p><footer><span>${item[0]}</span><span>查看记录 ›</span></footer></article>`).join("")}</div>`;
+      sheetTitle.textContent = "更新动态台账";
+      sheetContent.innerHTML = renderFeedList();
+    } else if (type === "feed-detail") {
+      const record = scopedFeedRecords().find(item => item.id === payload.id) || feedRecords[0];
+      sheetEyebrow.textContent = record.module;
+      sheetTitle.textContent = "事项详情";
+      sheetContent.innerHTML = renderFeedDetail(record.id);
     } else if (type === "search") {
       sheetEyebrow.textContent = "全局检索";
       sheetTitle.textContent = "搜索督办与经营事项";
@@ -749,7 +1447,7 @@
   companySearchInput.addEventListener("input", renderCompanySelector);
 
   document.addEventListener("click", event => {
-    const target = event.target.closest("[data-close-modal], [data-close-sheet], [data-close-company], [data-company-option], [data-confirm-company], [data-cancel-company], [data-scope-option], [data-menu-action], [data-search-result], [data-open-indicator], [data-modal-scope]");
+    const target = event.target.closest("[data-close-modal], [data-close-sheet], [data-close-company], [data-company-option], [data-confirm-company], [data-cancel-company], [data-scope-option], [data-menu-action], [data-setting-back], [data-setting-submit], [data-confirm-logout], [data-feed-id], [data-feed-back], [data-call-owner], [data-search-result], [data-open-indicator], [data-modal-scope]");
     if (!target) return;
     if (target.dataset.closeModal !== undefined) closeModal();
     if (target.dataset.closeSheet !== undefined) closeSheet();
@@ -769,7 +1467,27 @@
       closeSheet();
       if (returnIndicator) openIndicator(returnIndicator);
     }
-    if (target.dataset.menuAction) { showToast({ profile: "个人信息已打开", notice: "通知设置已打开", refresh: "数据刷新任务已提交", about: "当前为企业经营管理驾驶舱交互原型" }[target.dataset.menuAction]); }
+    if (target.dataset.menuAction) handleMenuAction(target.dataset.menuAction);
+    if (target.dataset.settingBack !== undefined) openSheet("menu");
+    if (target.dataset.settingSubmit) {
+      const messages = {
+        "profile-password": "密码修改已提交",
+        "profile-name": "名称修改已保存",
+        "notice-phone": "手机提醒授权已更新",
+        "notice-floating": "悬浮提醒设置已保存",
+        "notice-wechat": "微信消息提示已更新",
+        "notice-dnd": "免打扰时段已保存",
+        "refresh-now": "数据刷新任务已提交"
+      };
+      showToast(messages[target.dataset.settingSubmit] || "设置已保存");
+    }
+    if (target.dataset.feedId) openSheet("feed-detail", { id: target.dataset.feedId });
+    if (target.dataset.feedBack !== undefined) openSheet("feed");
+    if (target.dataset.callOwner) showToast(`正在联系 ${target.dataset.callOwner}`);
+    if (target.dataset.confirmLogout !== undefined) {
+      showToast("已退出当前账号");
+      closeSheet();
+    }
     if (target.dataset.searchResult) { showToast(`已定位：${target.dataset.searchResult}`); closeSheet(); }
     if (target.dataset.openIndicator) { const name = target.dataset.openIndicator; closeSheet(); openIndicator(name); }
   });
