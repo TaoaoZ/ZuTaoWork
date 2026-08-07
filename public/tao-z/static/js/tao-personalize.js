@@ -150,3 +150,68 @@
   document.querySelectorAll(".header-logo-sub-txt").forEach((node) => { node.textContent = "Portfolio"; });
   document.querySelectorAll(".ft-copy-txt").forEach((node) => { node.innerHTML = '<span data-year="#">[currentYear]</span> &copy; Tao.z'; });
 })();
+
+(function () {
+  const canvas = document.querySelector(".home-ser-title-wrap .title-dot-canvas");
+  if (!canvas) return;
+
+  const host = canvas.parentElement;
+  const interactionHost = canvas.closest(".home-ser-title-wrap");
+  const dots = [];
+  const pointer = { x: -9999, y: -9999 };
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let width = 0;
+  let height = 0;
+  let frame = 0;
+
+  const resize = () => {
+    const rect = host.getBoundingClientRect();
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    width = Math.max(1, Math.ceil(rect.width));
+    height = Math.max(1, Math.ceil(rect.height));
+    canvas.width = Math.ceil(width * ratio);
+    canvas.height = Math.ceil(height * ratio);
+    canvas.style.height = height + "px";
+    const context = canvas.getContext("2d");
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    dots.length = 0;
+    const gap = 20;
+    for (let y = 12; y < height; y += gap) {
+      for (let x = 12; x < width; x += gap) dots.push({ x, y });
+    }
+  };
+
+  const render = () => {
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, width, height);
+    dots.forEach((dot) => {
+      const dx = dot.x - pointer.x;
+      const dy = dot.y - pointer.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const influence = reducedMotion ? 0 : Math.max(0, 1 - distance / 150);
+      const radius = 2 + influence * 5;
+      const alpha = 0.12 + influence * 0.42;
+      context.beginPath();
+      context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
+      context.fillStyle = "rgba(92, 78, 190, " + alpha + ")";
+      context.fill();
+    });
+    frame = window.requestAnimationFrame(render);
+  };
+
+  resize();
+  window.addEventListener("resize", resize, { passive: true });
+  if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    interactionHost.addEventListener("pointermove", (event) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = event.clientX - rect.left;
+      pointer.y = event.clientY - rect.top;
+    }, { passive: true });
+    interactionHost.addEventListener("pointerleave", () => {
+      pointer.x = -9999;
+      pointer.y = -9999;
+    }, { passive: true });
+  }
+  window.addEventListener("pagehide", () => window.cancelAnimationFrame(frame), { once: true });
+  render();
+})();
