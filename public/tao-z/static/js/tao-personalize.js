@@ -189,14 +189,14 @@
       const dy = dot.y - pointer.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const influence = reducedMotion ? 0 : Math.max(0, 1 - distance / 150);
-      const radius = 2 + influence * 5;
-      const alpha = 0.12 + influence * 0.42;
+      const radius = 2 + influence * 3.4;
+      const alpha = 0.18 + influence * 0.48;
       context.beginPath();
       context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
-      context.fillStyle = "rgba(92, 78, 190, " + alpha + ")";
+      context.fillStyle = "rgba(118, 82, 238, " + alpha + ")";
       context.fill();
     });
-    frame = window.requestAnimationFrame(render);
+    frame = window.setTimeout(render, 16);
   };
 
   resize();
@@ -212,6 +212,6 @@
       pointer.y = -9999;
     }, { passive: true });
   }
-  window.addEventListener("pagehide", () => window.cancelAnimationFrame(frame), { once: true });
-  render();
+  window.addEventListener("pagehide", () => window.clearTimeout(frame), { once: true });
+  window.addEventListener("load", () => window.setTimeout(render, 0), { once: true });
 })();
