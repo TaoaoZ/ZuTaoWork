@@ -14705,6 +14705,43 @@ body {
 .header {
   filter: none;
   mix-blend-mode: normal;
+  --tao-header-height: 8rem;
+}
+
+.header::before {
+  content: "";
+  z-index: 0;
+  pointer-events: none;
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--tao-header-height);
+  background: rgba(245, 245, 247, .68);
+  border-bottom: 1px solid rgba(29, 29, 31, .12);
+  box-shadow: 0 .8rem 2.4rem rgba(31, 35, 41, .05);
+  -webkit-backdrop-filter: blur(2.4rem) saturate(145%);
+  backdrop-filter: blur(2.4rem) saturate(145%);
+}
+
+.header-top,
+.header-top.on-open {
+  background-color: transparent;
+}
+
+.line.header-top-line,
+.line.header-side-line {
+  background-color: transparent;
+}
+
+@media screen and (max-width: 767px) {
+  .header {
+    --tao-header-height: 6rem;
+  }
+
+  .header::before {
+    background: rgba(245, 245, 247, .78);
+    -webkit-backdrop-filter: blur(1.8rem) saturate(140%);
+    backdrop-filter: blur(1.8rem) saturate(140%);
+  }
 }
 
 .header-top,
