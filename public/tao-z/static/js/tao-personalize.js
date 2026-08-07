@@ -190,10 +190,10 @@
       const distance = Math.sqrt(dx * dx + dy * dy);
       const influence = reducedMotion ? 0 : Math.max(0, 1 - distance / 150);
       const radius = 2 + influence * 3.4;
-      const alpha = 0.18 + influence * 0.48;
+      const alpha = 0.3 + influence * 0.62;
       context.beginPath();
       context.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
-      context.fillStyle = "rgba(118, 82, 238, " + alpha + ")";
+      context.fillStyle = "rgba(25, 25, 25, " + alpha + ")";
       context.fill();
     });
     frame = window.setTimeout(render, 16);
