@@ -14775,6 +14775,15 @@ body {
   backdrop-filter: blur(2rem) saturate(120%);
 }
 
+/* Keep the capability stack solid; glass belongs to the fixed navigation only. */
+.home-ser-inner {
+  border-color: var(--border);
+  background: var(--body-bg);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 .home-ser-item-head,
 .home-proj-item-inner {
   border-color: rgba(29, 29, 31, .14);
